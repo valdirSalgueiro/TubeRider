@@ -6,6 +6,7 @@
 #include "Runtime/Engine/Classes/Components/SplineComponent.h"
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Obstacle.h"
 #include "Tube.generated.h"
 
 UCLASS()
@@ -23,6 +24,8 @@ public:
 		USplineComponent* Spline;
 	UPROPERTY()
 		TArray<USplineMeshComponent *> SplineMesh;
+	UPROPERTY(EditAnywhere, Category = Obstacle)
+		TArray<TSubclassOf<AObstacle>> Obstacles;
 
 	ATube();
 

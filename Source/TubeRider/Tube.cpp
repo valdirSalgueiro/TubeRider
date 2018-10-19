@@ -13,7 +13,8 @@
 
 
 ATube::ATube()
-{	Spline = CreateDefaultSubobject<USplineComponent>(TEXT("Spline"));
+{
+	Spline = CreateDefaultSubobject<USplineComponent>(TEXT("Spline"));
 	RootComponent = Spline;
 	Spline->SetMobility(EComponentMobility::Type::Static);
 
@@ -40,6 +41,8 @@ void ATube::InsertNewPoints()
 	for (int i = 0; i < 10; i++) {
 		float randomY = FMath::FRandRange(-200, 200);
 		float randomZ = FMath::FRandRange(-200, 200);
+		randomY = 0;
+		randomZ = 0;
 		UE_LOG(LogTemp, Display, TEXT("newpoint new %s"), *lastPoint.ToCompactString());
 		lastPoint += FVector(100, randomY, randomZ);
 		Spline->AddSplinePoint(lastPoint, ESplineCoordinateSpace::World);
@@ -95,6 +98,20 @@ void ATube::createSplineMesh()
 		splineMesh->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 		splineMesh->AttachToComponent(Spline, FAttachmentTransformRules::FAttachmentTransformRules(EAttachmentRule::KeepRelative, true));
 		SplineMesh.Add(splineMesh);
+		if (i != 0 && i % 5 == 0) 
+		{
+			UWorld* const World = GetWorld();
+			if (World && Obstacles.Num() > 0)
+			{
+				FActorSpawnParameters SpawnParams;
+				SpawnParams.Owner = this;
+				SpawnParams.Instigator = Instigator;
+
+				auto transform = Spline->GetTransformAtSplinePoint(i, ESplineCoordinateSpace::Local);
+				auto actor = World->SpawnActor<AObstacle>(Obstacles[0], transform, SpawnParams);
+				actor->AttachToComponent(Spline, FAttachmentTransformRules::FAttachmentTransformRules(EAttachmentRule::KeepRelative, true));
+			}
+		}
 	}
 	currentPoints = Spline->GetNumberOfSplinePoints() - 1;
 	created = true;
