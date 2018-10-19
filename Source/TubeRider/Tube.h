@@ -19,7 +19,7 @@ public:
 
 	UPROPERTY(EditAnywhere, Category = Mesh)
 		UStaticMesh* Mesh;
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, Category = Spline)
 		USplineComponent* Spline;
 	UPROPERTY()
 		TArray<USplineMeshComponent *> SplineMesh;

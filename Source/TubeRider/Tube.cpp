@@ -15,7 +15,7 @@
 ATube::ATube()
 {	Spline = CreateDefaultSubobject<USplineComponent>(TEXT("Spline"));
 	RootComponent = Spline;
-	Spline->SetMobility(EComponentMobility::Type::Movable);
+	Spline->SetMobility(EComponentMobility::Type::Static);
 
 	created = false;
 	currentPoints = 0;
@@ -87,6 +87,7 @@ void ATube::createSplineMesh()
 		Spline->GetLocationAndTangentAtSplinePoint(i + 1, locEnd, tanEnd, ESplineCoordinateSpace::Local);
 		UE_LOG(LogTemp, Display, TEXT("Start location and tangent: %s / %s"), *locStart.ToCompactString(), *tanStart.ToCompactString());
 		UE_LOG(LogTemp, Display, TEXT("End location and tangent: %s / %s"), *locEnd.ToCompactString(), *tanEnd.ToCompactString());
+		splineMesh->bSmoothInterpRollScale = true;
 		splineMesh->SetMobility(EComponentMobility::Type::Movable);
 		splineMesh->SetForwardAxis(ESplineMeshAxis::Y);
 		splineMesh->SetStaticMesh(Mesh);
