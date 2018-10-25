@@ -10,6 +10,8 @@
 #include "Runtime/Engine/Classes/Materials/Material.h"
 #include "Runtime/Engine/Classes/Engine/StaticMesh.h"
 #include "Runtime/CoreUObject/Public/UObject/ConstructorHelpers.h"
+#include "Runtime/Core/Public/Math/UnrealMathUtility.h"
+
 
 
 ATube::ATube()
@@ -21,6 +23,7 @@ ATube::ATube()
 	created = false;
 	currentPoints = 0;
 	PrimaryActorTick.bCanEverTick = true;
+	lastPoint = FVector::ZeroVector;
 }
 
 void ATube::BeginPlay()
@@ -35,19 +38,21 @@ void ATube::Tick(float DeltaTime)
 
 void ATube::InsertNewPoints()
 {
-	UE_LOG(LogTemp, Display, TEXT("inserting new new points"));
+	//UE_LOG(LogTemp, Display, TEXT("inserting new new points"));
 	int splinePointCount = Spline->GetNumberOfSplinePoints();
-	FVector lastPoint = Spline->GetWorldLocationAtSplinePoint(splinePointCount - 1);
-	for (int i = 0; i < 10; i++) {
-		float randomY = FMath::FRandRange(-200, 200);
-		float randomZ = FMath::FRandRange(-200, 200);
-		randomY = 0;
-		randomZ = 0;
-		UE_LOG(LogTemp, Display, TEXT("newpoint new %s"), *lastPoint.ToCompactString());
-		lastPoint += FVector(100, randomY, randomZ);
+	//FVector lastPoint = Spline->GetWorldLocationAtSplinePoint(splinePointCount - 1);
+	int i = 0;
+	while (i < 1000) {
 		Spline->AddSplinePoint(lastPoint, ESplineCoordinateSpace::World);
-		//lastPoint = newVector;
+		angleX++;
+		angleY++;
+		float newX = FMath::Cos(FMath::DegreesToRadians(angleX)) * 5.0f;
+		float newY = FMath::Sin(FMath::DegreesToRadians(angleY)) * 5.0f;
+		//UE_LOG(LogTemp, Display, TEXT("%f"), newX);
+		lastPoint += FVector(10, newX, newY);
+		i++;
 	}
+
 	createSplineMesh();
 }
 
@@ -84,12 +89,12 @@ void ATube::createSplineMesh()
 	{
 		USplineMeshComponent *splineMesh = NewObject<USplineMeshComponent>(this);
 		splineMesh->RegisterComponent();
-		UE_LOG(LogTemp, Display, TEXT("Added new USplineMeshComponent: %s"), *splineMesh->GetName());
+		//UE_LOG(LogTemp, Display, TEXT("Added new USplineMeshComponent: %s"), *splineMesh->GetName());
 		splineMesh->CreationMethod = EComponentCreationMethod::UserConstructionScript;
 		Spline->GetLocationAndTangentAtSplinePoint(i, locStart, tanStart, ESplineCoordinateSpace::Local);
 		Spline->GetLocationAndTangentAtSplinePoint(i + 1, locEnd, tanEnd, ESplineCoordinateSpace::Local);
-		UE_LOG(LogTemp, Display, TEXT("Start location and tangent: %s / %s"), *locStart.ToCompactString(), *tanStart.ToCompactString());
-		UE_LOG(LogTemp, Display, TEXT("End location and tangent: %s / %s"), *locEnd.ToCompactString(), *tanEnd.ToCompactString());
+		//UE_LOG(LogTemp, Display, TEXT("Start location and tangent: %s / %s"), *locStart.ToCompactString(), *tanStart.ToCompactString());
+		//UE_LOG(LogTemp, Display, TEXT("End location and tangent: %s / %s"), *locEnd.ToCompactString(), *tanEnd.ToCompactString());
 		splineMesh->bSmoothInterpRollScale = true;
 		splineMesh->SetMobility(EComponentMobility::Type::Movable);
 		splineMesh->SetForwardAxis(ESplineMeshAxis::Y);
@@ -98,7 +103,7 @@ void ATube::createSplineMesh()
 		splineMesh->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 		splineMesh->AttachToComponent(Spline, FAttachmentTransformRules::FAttachmentTransformRules(EAttachmentRule::KeepRelative, true));
 		SplineMesh.Add(splineMesh);
-		if (i != 0 && i % 5 == 0) 
+		if (i != 0 && i % 50 == 0)
 		{
 			UWorld* const World = GetWorld();
 			if (World && Obstacles.Num() > 0)
@@ -107,8 +112,12 @@ void ATube::createSplineMesh()
 				SpawnParams.Owner = this;
 				SpawnParams.Instigator = Instigator;
 
-				auto transform = Spline->GetTransformAtSplinePoint(i, ESplineCoordinateSpace::Local);
-				auto actor = World->SpawnActor<AObstacle>(Obstacles[0], transform, SpawnParams);
+				auto location = Spline->GetLocationAtSplinePoint(i, ESplineCoordinateSpace::Local);
+				auto rotation = Spline->GetRotationAtSplinePoint(i, ESplineCoordinateSpace::Local);
+				auto zero = FRotator::ZeroRotator;
+				rotation = rotation.Add(90, 0, 0);
+
+				auto actor = World->SpawnActor<AObstacle>(Obstacles[0], location, rotation, SpawnParams);
 				actor->AttachToComponent(Spline, FAttachmentTransformRules::FAttachmentTransformRules(EAttachmentRule::KeepRelative, true));
 			}
 		}

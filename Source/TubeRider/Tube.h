@@ -43,11 +43,22 @@ public:
 
 	void InsertNewPoints();
 
+	void InitializePoints();
+
 private:
 	void createSplineMesh();
 
 	int currentPoints;
 
-	
+	int yDirection;
+	int zDirection;
+
+	TArray<FVector> SplinePoints;
+	FVector lastPoint;
+	float angleX;
+	float angleY;
+
+	float xDir;
+	float yDir;
 	
 };
