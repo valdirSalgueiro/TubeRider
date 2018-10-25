@@ -43,8 +43,6 @@ public:
 
 	void InsertNewPoints();
 
-	void InitializePoints();
-
 private:
 	void createSplineMesh();
 
