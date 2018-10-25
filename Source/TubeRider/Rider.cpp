@@ -47,7 +47,7 @@ void ARider::Tick(float DeltaTime)
 		auto SplineComponent = tube->GetSpline();
 		int numberOfSplinePoints = SplineComponent->GetNumberOfSplinePoints();
 		float totalLength = SplineComponent->GetSplineLength();
-		if (distance >= totalLength / 5.0f)
+		if (distance >= totalLength / 2.5f)
 		{
 			tube->InsertNewPoints();
 			numberOfSplinePoints = SplineComponent->GetNumberOfSplinePoints();

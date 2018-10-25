@@ -11,6 +11,7 @@
 #include "Runtime/Engine/Classes/Engine/StaticMesh.h"
 #include "Runtime/CoreUObject/Public/UObject/ConstructorHelpers.h"
 #include "Runtime/Core/Public/Math/UnrealMathUtility.h"
+#include <time.h>
 
 
 
@@ -23,7 +24,8 @@ ATube::ATube()
 	created = false;
 	currentPoints = 0;
 	PrimaryActorTick.bCanEverTick = true;
-	lastPoint = FVector::ZeroVector;
+	lastPoint = GetActorLocation();
+	srand(time(NULL));
 }
 
 void ATube::BeginPlay()
@@ -38,22 +40,68 @@ void ATube::Tick(float DeltaTime)
 
 void ATube::InsertNewPoints()
 {
-	//UE_LOG(LogTemp, Display, TEXT("inserting new new points"));
 	int splinePointCount = Spline->GetNumberOfSplinePoints();
-	//FVector lastPoint = Spline->GetWorldLocationAtSplinePoint(splinePointCount - 1);
 	int i = 0;
-	while (i < 1000) {
+
+	//UE_LOG(LogTemp, Display, TEXT("%d %d"), splinePointCount - 2, splinePointCount - 2 % 20);
+	if ((splinePointCount - 2) % 100 == 0) {
+		int randomDirection = rand() % 2;
+		angleHDest = GetNewRandomAngle();
+		angleVDest = GetNewRandomAngle();
+		angleHDest = randomDirection ? angleHDest : -angleHDest;
+		randomDirection = rand() % 2;
+		angleVDest = randomDirection ? angleVDest : -angleVDest;
+	}
+	angleHDest = 45;
+	angleVDest = 0;
+	while (i < 10) {
 		Spline->AddSplinePoint(lastPoint, ESplineCoordinateSpace::World);
-		angleX++;
-		angleY++;
-		float newX = FMath::Cos(FMath::DegreesToRadians(angleX)) * 5.0f;
-		float newY = FMath::Sin(FMath::DegreesToRadians(angleY)) * 5.0f;
-		//UE_LOG(LogTemp, Display, TEXT("%f"), newX);
-		lastPoint += FVector(10, newX, newY);
+		if (angleH < angleHDest) {
+			angleH++;
+		}
+		else if (angleH > angleHDest) {
+			angleH--;
+		}
+
+		if (angleV < angleVDest) {
+			angleV++;
+		}
+		else if (angleV > angleVDest) {
+			angleV--;
+		}
+
+		float newX = FMath::Cos(FMath::DegreesToRadians(angleH)) * 5.0f;
+		float newY = FMath::Sin(FMath::DegreesToRadians(angleH)) * 5.0f;
+		float newZ = FMath::Sin(FMath::DegreesToRadians(angleV)) * 5.0f;
+		lastPoint += FVector(newX, newY, newZ);
 		i++;
 	}
 
 	createSplineMesh();
+}
+
+int ATube::GetNewRandomAngle()
+{
+	int random = rand() % 5;
+	float angle = 0;
+	switch (random) {
+	case 0:
+		angle = 0;
+		break;
+	case 1:
+		angle = 45;
+		break;
+	case 2:
+		angle = 90;
+		break;
+	case 3:
+		angle = 135;
+		break;
+	default:
+		angle = 180;
+		break;
+	}
+	return angle;
 }
 
 void ATube::OnConstruction(const FTransform& Transform)
@@ -114,8 +162,8 @@ void ATube::createSplineMesh()
 
 				auto location = Spline->GetLocationAtSplinePoint(i, ESplineCoordinateSpace::Local);
 				auto rotation = Spline->GetRotationAtSplinePoint(i, ESplineCoordinateSpace::Local);
-				auto zero = FRotator::ZeroRotator;
 				rotation = rotation.Add(90, 0, 0);
+				location += FVector(-7, 0, 0);
 
 				auto actor = World->SpawnActor<AObstacle>(Obstacles[0], location, rotation, SpawnParams);
 				actor->AttachToComponent(Spline, FAttachmentTransformRules::FAttachmentTransformRules(EAttachmentRule::KeepRelative, true));

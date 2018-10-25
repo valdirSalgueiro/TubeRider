@@ -46,6 +46,8 @@ public:
 private:
 	void createSplineMesh();
 
+	int GetNewRandomAngle();
+
 	int currentPoints;
 
 	int yDirection;
@@ -53,10 +55,11 @@ private:
 
 	TArray<FVector> SplinePoints;
 	FVector lastPoint;
-	float angleX;
-	float angleY;
+	float angleH;
+	float angleV;
+	float angleHDest;
+	float angleVDest;
 
 	float xDir;
-	float yDir;
-	
+	float yDir;	
 };
