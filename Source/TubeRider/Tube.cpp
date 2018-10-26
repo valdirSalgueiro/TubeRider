@@ -52,7 +52,7 @@ void ATube::InsertNewPoints()
 		randomDirection = rand() % 2;
 		angleVDest = randomDirection ? angleVDest : -angleVDest;
 	}
-	angleHDest = 45;
+	//angleHDest = -33;
 	angleVDest = 0;
 	while (i < 10) {
 		Spline->AddSplinePoint(lastPoint, ESplineCoordinateSpace::World);
@@ -137,12 +137,9 @@ void ATube::createSplineMesh()
 	{
 		USplineMeshComponent *splineMesh = NewObject<USplineMeshComponent>(this);
 		splineMesh->RegisterComponent();
-		//UE_LOG(LogTemp, Display, TEXT("Added new USplineMeshComponent: %s"), *splineMesh->GetName());
 		splineMesh->CreationMethod = EComponentCreationMethod::UserConstructionScript;
 		Spline->GetLocationAndTangentAtSplinePoint(i, locStart, tanStart, ESplineCoordinateSpace::Local);
 		Spline->GetLocationAndTangentAtSplinePoint(i + 1, locEnd, tanEnd, ESplineCoordinateSpace::Local);
-		//UE_LOG(LogTemp, Display, TEXT("Start location and tangent: %s / %s"), *locStart.ToCompactString(), *tanStart.ToCompactString());
-		//UE_LOG(LogTemp, Display, TEXT("End location and tangent: %s / %s"), *locEnd.ToCompactString(), *tanEnd.ToCompactString());
 		splineMesh->bSmoothInterpRollScale = true;
 		splineMesh->SetMobility(EComponentMobility::Type::Movable);
 		splineMesh->SetForwardAxis(ESplineMeshAxis::Y);
@@ -150,27 +147,21 @@ void ATube::createSplineMesh()
 		splineMesh->SetStartAndEnd(locStart, tanStart, locEnd, tanEnd);
 		splineMesh->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 		splineMesh->AttachToComponent(Spline, FAttachmentTransformRules::FAttachmentTransformRules(EAttachmentRule::KeepRelative, true));
+		splineMesh->SetStartOffset(FVector2D(-15, 0));
+		splineMesh->SetEndOffset(FVector2D(-15, 0));
 		SplineMesh.Add(splineMesh);
 		if (i != 0 && i % 50 == 0)
 		{
 			UWorld* const World = GetWorld();
 			if (World && Obstacles.Num() > 0)
 			{
-				FActorSpawnParameters SpawnParams;
-				SpawnParams.Owner = this;
-				SpawnParams.Instigator = Instigator;
-
-				auto location = Spline->GetLocationAtSplinePoint(i, ESplineCoordinateSpace::Local);
-				auto rotation = Spline->GetRotationAtSplinePoint(i, ESplineCoordinateSpace::Local);
-				rotation = rotation.Add(90, 0, 0);
-				location += FVector(-7, 0, 0);
-
-				auto actor = World->SpawnActor<AObstacle>(Obstacles[0], location, rotation, SpawnParams);
-				actor->AttachToComponent(Spline, FAttachmentTransformRules::FAttachmentTransformRules(EAttachmentRule::KeepRelative, true));
+				auto transform = Spline->GetTransformAtSplinePoint(i, ESplineCoordinateSpace::World);
+				auto rotation = FRotator(transform.GetRotation()).Add(90, 0, 0);
+				auto offset = FVector(0, 0, 0);
+				auto actor = World->SpawnActor<AObstacle>(Obstacles[0], transform.GetLocation() - offset, rotation);
 			}
 		}
 	}
 	currentPoints = Spline->GetNumberOfSplinePoints() - 1;
 	created = true;
 }
-
