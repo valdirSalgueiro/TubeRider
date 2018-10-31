@@ -24,6 +24,9 @@ public:
 	/** Return the mesh for the pickup */
 	FORCEINLINE class UStaticMeshComponent* GetMesh() const { return ObstacleMesh; }
 
+	UFUNCTION()
+	void HandleCollision(UPrimitiveComponent* OverlappedComponent, AActor* Other, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& OverlapInfo);
+
 private:
 	/** Static mesh to represent the pickup in the level*/
 	UPROPERTY(VisibleAnywhere, Category = "Obstacle", meta = (AllowPrivateAccess = "true"))

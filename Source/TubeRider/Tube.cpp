@@ -18,7 +18,9 @@
 ATube::ATube()
 {
 	Spline = CreateDefaultSubobject<USplineComponent>(TEXT("Spline"));
+	Spline->SetGenerateOverlapEvents(false);
 	RootComponent = Spline;
+	
 	Spline->SetMobility(EComponentMobility::Type::Static);
 
 	created = false;
@@ -26,6 +28,8 @@ ATube::ATube()
 	PrimaryActorTick.bCanEverTick = true;
 	lastPoint = GetActorLocation();
 	srand(time(NULL));
+
+	SetActorEnableCollision(false);	
 }
 
 void ATube::BeginPlay()
@@ -157,8 +161,8 @@ void ATube::createSplineMesh()
 			{
 				auto transform = Spline->GetTransformAtSplinePoint(i, ESplineCoordinateSpace::World);
 				auto rotation = FRotator(transform.GetRotation()).Add(90, 0, 0);
-				auto offset = FVector(0, 0, 0);
-				auto actor = World->SpawnActor<AObstacle>(Obstacles[0], transform.GetLocation() - offset, rotation);
+				 World->SpawnActor<AObstacle>(Obstacles[0], transform.GetLocation(), rotation);
+				//UE_LOG(LogTemp, Display, TEXT("colidiu: %s"), *transform.GetLocation().ToCompactString());
 			}
 		}
 	}

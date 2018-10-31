@@ -23,8 +23,6 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-	UPROPERTY(EditAnywhere)
-		ATube* tube;
 
 public:
 	// Called every frame
@@ -42,4 +40,8 @@ protected:
 	//Input functions
 	void MoveRight(float AxisValue);
 	float angle;
+
+private:
+	UPROPERTY(EditAnywhere, Category = "Spline", meta = (AllowPrivateAccess = "true"))
+	ATube* tube;
 };
