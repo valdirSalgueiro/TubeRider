@@ -13,19 +13,25 @@ UCLASS()
 class TUBERIDER_API ATube : public AActor
 {
 	GENERATED_BODY()
-	
+
 public:
 
 	bool created;
 
 	UPROPERTY(EditAnywhere, Category = Mesh)
 		UStaticMesh* Mesh;
-	UPROPERTY(EditAnywhere, Category = Spline)
-		USplineComponent* Spline;
-	UPROPERTY()
-		TArray<USplineMeshComponent *> SplineMesh;
+
+	USplineComponent* Spline;
+
+	TArray<USplineMeshComponent *> SplineMesh;
+
 	UPROPERTY(EditAnywhere, Category = Obstacle)
 		TArray<TSubclassOf<AObstacle>> Obstacles;
+
+	UPROPERTY(EditAnywhere, Category = Obstacle)
+		UMaterial* Material;
+
+	TArray<AActor*> ObstaclesActor;
 
 	ATube();
 
@@ -41,7 +47,11 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	void InsertNewPoints();
+	void InsertNewPoints(float distance, bool createMesh);
+
+	bool IsReady() {
+		return isReady;
+	}
 
 private:
 	void createSplineMesh();
@@ -62,4 +72,10 @@ private:
 
 	float xDir;
 	float yDir;	
+
+	float playerDistance;
+
+	int removePointIndex;
+
+	bool isReady;
 };

@@ -1,9 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "PlayerRider.h"
-#include "Runtime/Engine/Classes/Components/SphereComponent.h"
-#include "Runtime/CoreUObject/Public/UObject/ConstructorHelpers.h" 
-#include "Runtime/Engine/Public/EngineUtils.h"
+
 
 
 // Sets default values
@@ -12,11 +10,13 @@ APlayerRider::APlayerRider()
 	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 	AutoPossessPlayer = EAutoReceiveInput::Player0;
-	USphereComponent* SphereComponent = CreateDefaultSubobject<USphereComponent>(TEXT("RootComponent"));;
+	SphereComponent = CreateDefaultSubobject<USphereComponent>(TEXT("RootComponent"));;
 	RootComponent = SphereComponent;
 	SphereComponent->InitSphereRadius(1.0f);
 	SphereComponent->SetCollisionProfileName(TEXT("Pawn"));
 	SphereComponent->SetHiddenInGame(true);
+	SphereComponent->SetSimulatePhysics(false);
+	SphereComponent->SetEnableGravity(false);
 	//SetActorRelativeLocation(FVector(60, 0, 0));
 
 	// debug visual
@@ -39,10 +39,17 @@ APlayerRider::APlayerRider()
 	Camera->SetupAttachment(RootComponent);
 	//Camera->SetRelativeLocation(FVector(60, 0, 0));
 	//Camera->SetupAttachment(CameraSpringArm, USpringArmComponent::SocketName);
-	distance = 0;
+
+	auto FlashLightComponent = CreateDefaultSubobject<USpotLightComponent>(TEXT("Flashlight"));
+	FlashLightComponent->SetupAttachment(RootComponent);
+	FlashLightComponent->RelativeLocation = FVector(10, 0, 4.f);
+	FlashLightComponent->AttenuationRadius = 1000.f;
+	FlashLightComponent->bAffectsWorld = true;
+	FlashLightComponent->SetMobility(EComponentMobility::Movable);
+
 	angle = 90;
-
-
+	distance = 0;
+	
 }
 
 // Called when the game starts or when spawned
@@ -54,34 +61,46 @@ void APlayerRider::BeginPlay()
 		tube = *ActorItr;
 		break;
 	}
+	auto SplineComponent = tube->GetSpline();
+	distance = SplineComponent->GetSplineLength() * 0.5f;
 }
+float lastX = 0;
+float lastY = 0;
+float lastZ = 0;
 
 // Called every frame
 void APlayerRider::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	distance += DeltaTime * 300.0f;
 
-	if (tube != NULL)
+	if (tube != NULL && tube->IsReady())
 	{
 		auto SplineComponent = tube->GetSpline();
 		if (SplineComponent != NULL) {
-			tube->InsertNewPoints();
 			int numberOfSplinePoints = SplineComponent->GetNumberOfSplinePoints();
-			float totalLength = SplineComponent->GetSplineLength();
+			if (numberOfSplinePoints > 100) {
+				float totalLength = SplineComponent->GetSplineLength();
 
-			auto transform = SplineComponent->GetTransformAtDistanceAlongSpline(distance, ESplineCoordinateSpace::World);
-			FVector location = transform.GetLocation();
-			if (!MovementInput.IsZero())
-			{
-				MovementInput = MovementInput.GetSafeNormal();
-				angle += MovementInput.Y;
-				angle = (int)angle % 360;
+				auto transform = SplineComponent->GetTransformAtDistanceAlongSpline(distance, ESplineCoordinateSpace::World);
+				FVector location = transform.GetLocation();
+				if (!MovementInput.IsZero())
+				{
+					MovementInput = MovementInput.GetSafeNormal();
+					angle += MovementInput.Y * 300 * DeltaTime;
+					angle = (int)angle % 360;
+				}
+				auto vecRight = FRotationMatrix(transform.Rotator()).GetScaledAxis(EAxis::Y);
+				auto vecUp = FRotationMatrix(transform.Rotator()).GetScaledAxis(EAxis::Z);
+				transform.SetLocation(location + (-vecRight * FMath::Cos(FMath::DegreesToRadians(angle)) * 30) + (vecUp * FMath::Sin(FMath::DegreesToRadians(angle)) * 30));
+				SetActorTransform(transform);
+
+				while (distance >= totalLength / 2.0f)
+				{
+					tube->InsertNewPoints(distance, true);
+					totalLength = SplineComponent->GetSplineLength();
+				}
+				distance += DeltaTime * 300.0f;
 			}
-			auto vecRight = FRotationMatrix(transform.Rotator()).GetScaledAxis(EAxis::Y);
-			auto vecUp = FRotationMatrix(transform.Rotator()).GetScaledAxis(EAxis::Z);
-			transform.SetLocation(location + (vecRight * -FMath::Cos(FMath::DegreesToRadians(angle)) * 30) + (vecUp * FMath::Sin(FMath::DegreesToRadians(angle)) * 30));
-			SetActorTransform(transform);
 		}
 	}
 }

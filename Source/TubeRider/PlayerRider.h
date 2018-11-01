@@ -8,6 +8,10 @@
 #include "Tube.h"
 #include "Runtime/Engine/Classes/GameFramework/Actor.h"
 #include "Runtime/Engine/Classes/GameFramework/SpringArmComponent.h"
+#include "Runtime/Engine/Classes/Components/SphereComponent.h"
+#include "Runtime/Engine/Classes/Components/SpotLightComponent.h"
+#include "Runtime/CoreUObject/Public/UObject/ConstructorHelpers.h" 
+#include "Runtime/Engine/Public/EngineUtils.h"
 #include "PlayerRider.generated.h"
 
 UCLASS()
@@ -32,8 +36,7 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 protected:
-	UCameraComponent* Camera;
-	USpringArmComponent* CameraSpringArm;
+
 	float distance;
 	FVector2D MovementInput;
 
@@ -42,6 +45,15 @@ protected:
 	float angle;
 
 private:
-	UPROPERTY(EditAnywhere, Category = "Spline", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, Category = "Player", meta = (AllowPrivateAccess = "true"))
 	ATube* tube;
+
+	UPROPERTY(EditAnywhere, Category = "Player", meta = (AllowPrivateAccess = "true"))
+	USphereComponent* SphereComponent;
+
+	UPROPERTY(EditAnywhere, Category = "Player", meta = (AllowPrivateAccess = "true"))
+	UCameraComponent* Camera;
+
+	UPROPERTY(EditAnywhere, Category = "Player", meta = (AllowPrivateAccess = "true"))
+	USpringArmComponent* CameraSpringArm;
 };

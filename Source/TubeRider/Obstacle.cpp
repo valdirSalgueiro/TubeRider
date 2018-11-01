@@ -42,7 +42,7 @@ void AObstacle::BeginPlay()
 	ObstacleMesh->GetBodySetup()->CollisionTraceFlag = ECollisionTraceFlag::CTF_UseSimpleAsComplex;
 	ObstacleMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	ObstacleMesh->SetCollisionResponseToAllChannels(ECR_Overlap);
-	ObstacleMesh->SetMobility(EComponentMobility::Static);
+	ObstacleMesh->SetMobility(EComponentMobility::Movable);
 	ObstacleMesh->SetGenerateOverlapEvents(true);
 	ObstacleMesh->SetSimulatePhysics(false);
 	ObstacleMesh->OnComponentBeginOverlap.AddDynamic(this, &AObstacle::HandleCollision);
