@@ -47,14 +47,15 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	void InsertNewPoints(float distance, bool createMesh);
+	void InsertNewPoints(float distance);
 
 	bool IsReady() {
 		return isReady;
 	}
 
+	void CreateSplineMesh();
+
 private:
-	void createSplineMesh();
 
 	int GetNewRandomAngle();
 

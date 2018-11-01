@@ -49,6 +49,9 @@ private:
 	ATube* tube;
 
 	UPROPERTY(EditAnywhere, Category = "Player", meta = (AllowPrivateAccess = "true"))
+	float playerVelocity;
+
+	UPROPERTY(EditAnywhere, Category = "Player", meta = (AllowPrivateAccess = "true"))
 	USphereComponent* SphereComponent;
 
 	UPROPERTY(EditAnywhere, Category = "Player", meta = (AllowPrivateAccess = "true"))

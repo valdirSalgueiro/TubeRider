@@ -49,6 +49,7 @@ APlayerRider::APlayerRider()
 
 	angle = 90;
 	distance = 0;
+	playerVelocity = 300;
 	
 }
 
@@ -96,10 +97,13 @@ void APlayerRider::Tick(float DeltaTime)
 
 				while (distance >= totalLength / 2.0f)
 				{
-					tube->InsertNewPoints(distance, true);
-					totalLength = SplineComponent->GetSplineLength();
+					for (int i = 0; i < 4; i++) {
+						tube->InsertNewPoints(distance);
+						totalLength = SplineComponent->GetSplineLength();
+					}
 				}
-				distance += DeltaTime * 300.0f;
+				tube->CreateSplineMesh();
+				distance += DeltaTime * playerVelocity;
 			}
 		}
 	}

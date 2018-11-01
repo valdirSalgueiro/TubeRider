@@ -45,7 +45,7 @@ void ATube::BeginPlay()
 	int splinePointCount = Spline->GetNumberOfSplinePoints();
 	while (splinePointCount < 1000)
 	{
-		InsertNewPoints(0, false);
+		InsertNewPoints(0);
 		splinePointCount = Spline->GetNumberOfSplinePoints();
 	}
 	isReady = true;
@@ -56,7 +56,7 @@ void ATube::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
-void ATube::InsertNewPoints(float distance, bool createMesh)
+void ATube::InsertNewPoints(float distance)
 {
 	playerDistance = distance;
 	int splinePointCount = Spline->GetNumberOfSplinePoints();
@@ -103,9 +103,6 @@ void ATube::InsertNewPoints(float distance, bool createMesh)
 	lastPoint += FVector(newX, newY, newZ);
 	i++;
 	Spline->AddSplinePoint(lastPoint, ESplineCoordinateSpace::World);
-
-	if (createMesh)
-		createSplineMesh();
 }
 
 int ATube::GetNewRandomAngle()
@@ -136,11 +133,11 @@ void ATube::OnConstruction(const FTransform& Transform)
 {
 	if (!created)
 	{
-		this->createSplineMesh();
+		this->CreateSplineMesh();
 	}
 }
 
-void ATube::createSplineMesh()
+void ATube::CreateSplineMesh()
 {
 	FVector locStart;
 	FVector tanStart;
@@ -149,7 +146,7 @@ void ATube::createSplineMesh()
 
 	if (Spline->GetDistanceAlongSplineAtSplinePoint(removePointIndex) < playerDistance && SplineMesh.Num() > 0 && SplineMesh[0])
 	{
-		UE_LOG(LogTemp, Display, TEXT("in cleaning up %d %d %f %f"), SplineMesh.Num(), removePointIndex, Spline->GetDistanceAlongSplineAtSplinePoint(removePointIndex), playerDistance);
+		//UE_LOG(LogTemp, Display, TEXT("in cleaning up %d %d %f %f"), SplineMesh.Num(), removePointIndex, Spline->GetDistanceAlongSplineAtSplinePoint(removePointIndex), playerDistance);
 		SplineMesh[0]->UnregisterComponent();
 		SplineMesh[0]->DetachFromParent();
 		SplineMesh[0]->DestroyComponent();
