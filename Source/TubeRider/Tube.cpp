@@ -19,22 +19,25 @@ ATube::ATube()
 {
 	Spline = CreateDefaultSubobject<USplineComponent>(TEXT("Spline"));
 	Spline->SetGenerateOverlapEvents(false);
+	Spline->SetMobility(EComponentMobility::Type::Movable);
 	RootComponent = Spline;
-	
-	Spline->SetMobility(EComponentMobility::Type::Static);
+
+	//Spline->SetCollisionProfileName(FName("OverlapAll"));
+	Spline->SetGenerateOverlapEvents(false);
 
 	created = false;
 	currentPoints = 0;
 	PrimaryActorTick.bCanEverTick = true;
-	lastPoint = GetActorLocation();
 	srand(time(NULL));
 
-	SetActorEnableCollision(false);	
+	SetActorEnableCollision(false);
 }
 
 void ATube::BeginPlay()
 {
 	Super::BeginPlay();
+	SetActorLocation(FVector::ZeroVector);
+	lastPoint = GetActorLocation();
 }
 
 void ATube::Tick(float DeltaTime)
@@ -56,30 +59,29 @@ void ATube::InsertNewPoints()
 		randomDirection = rand() % 2;
 		angleVDest = randomDirection ? angleVDest : -angleVDest;
 	}
-	//angleHDest = -33;
-	angleVDest = 0;
-	while (i < 10) {
-		Spline->AddSplinePoint(lastPoint, ESplineCoordinateSpace::World);
-		if (angleH < angleHDest) {
-			angleH++;
-		}
-		else if (angleH > angleHDest) {
-			angleH--;
-		}
+	//angleHDest = 0;
+	//angleVDest = 0;
 
-		if (angleV < angleVDest) {
-			angleV++;
-		}
-		else if (angleV > angleVDest) {
-			angleV--;
-		}
-
-		float newX = FMath::Cos(FMath::DegreesToRadians(angleH)) * 5.0f;
-		float newY = FMath::Sin(FMath::DegreesToRadians(angleH)) * 5.0f;
-		float newZ = FMath::Sin(FMath::DegreesToRadians(angleV)) * 5.0f;
-		lastPoint += FVector(newX, newY, newZ);
-		i++;
+	Spline->AddSplinePoint(lastPoint, ESplineCoordinateSpace::World);
+	if (angleH < angleHDest) {
+		angleH++;
 	}
+	else if (angleH > angleHDest) {
+		angleH--;
+	}
+
+	if (angleV < angleVDest) {
+		angleV++;
+	}
+	else if (angleV > angleVDest) {
+		angleV--;
+	}
+
+	float newX = FMath::Cos(FMath::DegreesToRadians(angleH)) * 20.0f;
+	float newY = FMath::Sin(FMath::DegreesToRadians(angleH)) * 20.0f;
+	float newZ = FMath::Sin(FMath::DegreesToRadians(angleV)) * 20.0f;
+	lastPoint += FVector(newX, newY, newZ);
+	i++;
 
 	createSplineMesh();
 }
@@ -123,10 +125,9 @@ void ATube::createSplineMesh()
 	FVector locEnd;
 	FVector tanEnd;
 
-	// Clean up stale mesh components
 	//if (SplineMesh.Num() > 0)
 	//{
-	//	for (int32 i = 0; i < SplineMesh.Num(); i++)
+	//	for (int32 i = 0; i < currentPoints; i++)
 	//	{
 	//		if (SplineMesh[i])
 	//		{
@@ -136,7 +137,8 @@ void ATube::createSplineMesh()
 	//	}
 	//	SplineMesh.Empty();
 	//}
-
+	//currentPoints = 0;
+		
 	for (int32 i = currentPoints; i < Spline->GetNumberOfSplinePoints() - 1; i++)
 	{
 		USplineMeshComponent *splineMesh = NewObject<USplineMeshComponent>(this);
@@ -161,8 +163,7 @@ void ATube::createSplineMesh()
 			{
 				auto transform = Spline->GetTransformAtSplinePoint(i, ESplineCoordinateSpace::World);
 				auto rotation = FRotator(transform.GetRotation()).Add(90, 0, 0);
-				 World->SpawnActor<AObstacle>(Obstacles[0], transform.GetLocation(), rotation);
-				//UE_LOG(LogTemp, Display, TEXT("colidiu: %s"), *transform.GetLocation().ToCompactString());
+				auto actor = World->SpawnActor<AObstacle>(Obstacles[0], transform.GetLocation(), rotation);
 			}
 		}
 	}

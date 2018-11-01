@@ -3,6 +3,7 @@
 #include "PlayerRider.h"
 #include "Runtime/Engine/Classes/Components/SphereComponent.h"
 #include "Runtime/CoreUObject/Public/UObject/ConstructorHelpers.h" 
+#include "Runtime/Engine/Public/EngineUtils.h"
 
 
 // Sets default values
@@ -13,33 +14,46 @@ APlayerRider::APlayerRider()
 	AutoPossessPlayer = EAutoReceiveInput::Player0;
 	USphereComponent* SphereComponent = CreateDefaultSubobject<USphereComponent>(TEXT("RootComponent"));;
 	RootComponent = SphereComponent;
-	SphereComponent->InitSphereRadius(40.0f);
+	SphereComponent->InitSphereRadius(1.0f);
 	SphereComponent->SetCollisionProfileName(TEXT("Pawn"));
+	SphereComponent->SetHiddenInGame(true);
+	//SetActorRelativeLocation(FVector(60, 0, 0));
 
 	// debug visual
-	UStaticMeshComponent* SphereVisual = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("VisualRepresentation"));
-	SphereVisual->SetupAttachment(RootComponent);
-	static ConstructorHelpers::FObjectFinder<UStaticMesh>SphereVisualAsset(TEXT("/Game/StarterContent/Shapes/Shape_Sphere.Shape_Sphere"));
-	if (SphereVisualAsset.Succeeded())
-	{
-		SphereVisual->SetStaticMesh(SphereVisualAsset.Object);
-		SphereVisual->SetRelativeLocation(FVector(0.0f, 0.0f, -40.0f));
-		SphereVisual->SetWorldScale3D(FVector(0.8f));
-	}
+	//UStaticMeshComponent* SphereVisual = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("VisualRepresentation"));
+	//SphereVisual->SetupAttachment(RootComponent);
+	//static ConstructorHelpers::FObjectFinder<UStaticMesh>SphereVisualAsset(TEXT("/Game/StarterContent/Shapes/Shape_Sphere.Shape_Sphere"));
+	//if (SphereVisualAsset.Succeeded())
+	//{
+	//	SphereVisual->SetStaticMesh(SphereVisualAsset.Object);
+	//	SphereVisual->SetRelativeLocation(FVector(0.0f, 0.0f, -15.0f));
+	//	SphereVisual->SetWorldScale3D(FVector(0.3f));
+	//	SphereVisual->SetGenerateOverlapEvents(false);
+	//}
 
 	CameraSpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraSpringArm"));
 	CameraSpringArm->SetupAttachment(RootComponent);
-	CameraSpringArm->TargetArmLength = 400.f;
+	CameraSpringArm->TargetArmLength = 0.f;
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("GameCamera"));
-	Camera->SetupAttachment(CameraSpringArm, USpringArmComponent::SocketName);
+	//Camera->SetupAttachment(CameraSpringArm, USpringArmComponent::SocketName);
+	Camera->SetupAttachment(RootComponent);
+	//Camera->SetRelativeLocation(FVector(60, 0, 0));
+	//Camera->SetupAttachment(CameraSpringArm, USpringArmComponent::SocketName);
 	distance = 0;
 	angle = 90;
+
+
 }
 
 // Called when the game starts or when spawned
 void APlayerRider::BeginPlay()
 {
 	Super::BeginPlay();
+	for (TActorIterator<ATube> ActorItr(GetWorld()); ActorItr; ++ActorItr)
+	{
+		tube = *ActorItr;
+		break;
+	}
 }
 
 // Called every frame
@@ -52,21 +66,16 @@ void APlayerRider::Tick(float DeltaTime)
 	{
 		auto SplineComponent = tube->GetSpline();
 		if (SplineComponent != NULL) {
+			tube->InsertNewPoints();
 			int numberOfSplinePoints = SplineComponent->GetNumberOfSplinePoints();
 			float totalLength = SplineComponent->GetSplineLength();
-			if (distance >= totalLength / 2.5f)
-			{
-				tube->InsertNewPoints();
-				numberOfSplinePoints = SplineComponent->GetNumberOfSplinePoints();
-				totalLength = SplineComponent->GetSplineLength();
-			}
 
 			auto transform = SplineComponent->GetTransformAtDistanceAlongSpline(distance, ESplineCoordinateSpace::World);
 			FVector location = transform.GetLocation();
 			if (!MovementInput.IsZero())
 			{
 				MovementInput = MovementInput.GetSafeNormal();
-				angle += MovementInput.Y * 5.0f;
+				angle += MovementInput.Y;
 				angle = (int)angle % 360;
 			}
 			auto vecRight = FRotationMatrix(transform.Rotator()).GetScaledAxis(EAxis::Y);
