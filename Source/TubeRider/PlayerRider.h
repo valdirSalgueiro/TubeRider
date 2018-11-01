@@ -12,6 +12,7 @@
 #include "Runtime/Engine/Classes/Components/SpotLightComponent.h"
 #include "Runtime/CoreUObject/Public/UObject/ConstructorHelpers.h" 
 #include "Runtime/Engine/Public/EngineUtils.h"
+#include "Runtime/Engine/Classes/Camera/CameraShake.h"
 #include "PlayerRider.generated.h"
 
 UCLASS()
@@ -23,7 +24,7 @@ public:
 	// Sets default values for this pawn's properties
 	APlayerRider();
 
-protected:
+protected: 
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
@@ -35,6 +36,9 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	
+	void Shake(float scale);
+
 protected:
 
 	float distance;
@@ -43,6 +47,9 @@ protected:
 	//Input functions
 	void MoveRight(float AxisValue);
 	float angle;
+
+	UPROPERTY(EditAnywhere, Category = "Player")
+		TSubclassOf<UCameraShake> cameraShake;
 
 private:
 	UPROPERTY(EditAnywhere, Category = "Player", meta = (AllowPrivateAccess = "true"))
@@ -59,4 +66,7 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "Player", meta = (AllowPrivateAccess = "true"))
 	USpringArmComponent* CameraSpringArm;
+
+
+
 };

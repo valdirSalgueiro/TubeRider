@@ -27,10 +27,13 @@ public:
 	UFUNCTION()
 	void HandleCollision(UPrimitiveComponent* OverlappedComponent, AActor* Other, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& OverlapInfo);
 
+	float rotationVelocity;
+
+	float angle;
+
 private:
 	/** Static mesh to represent the pickup in the level*/
 	UPROPERTY(VisibleAnywhere, Category = "Obstacle", meta = (AllowPrivateAccess = "true"))
 		class UStaticMeshComponent* ObstacleMesh;
-	
 	
 };

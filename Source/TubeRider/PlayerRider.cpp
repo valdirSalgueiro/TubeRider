@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "PlayerRider.h"
-
+#include "Runtime/Engine/Classes/GameFramework/PlayerController.h"
 
 
 // Sets default values
@@ -35,10 +35,7 @@ APlayerRider::APlayerRider()
 	CameraSpringArm->SetupAttachment(RootComponent);
 	CameraSpringArm->TargetArmLength = 0.f;
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("GameCamera"));
-	//Camera->SetupAttachment(CameraSpringArm, USpringArmComponent::SocketName);
 	Camera->SetupAttachment(RootComponent);
-	//Camera->SetRelativeLocation(FVector(60, 0, 0));
-	//Camera->SetupAttachment(CameraSpringArm, USpringArmComponent::SocketName);
 
 	auto FlashLightComponent = CreateDefaultSubobject<USpotLightComponent>(TEXT("Flashlight"));
 	FlashLightComponent->SetupAttachment(RootComponent);
@@ -50,7 +47,7 @@ APlayerRider::APlayerRider()
 	angle = 90;
 	distance = 0;
 	playerVelocity = 300;
-	
+
 }
 
 // Called when the game starts or when spawned
@@ -120,5 +117,13 @@ void APlayerRider::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 void APlayerRider::MoveRight(float AxisValue)
 {
 	MovementInput.Y = FMath::Clamp<float>(AxisValue, -1.0f, 1.0f);
+}
+//Input functions
+void APlayerRider::Shake(float scale)
+{
+	if (cameraShake != NULL)
+	{
+		GetWorld()->GetFirstPlayerController()->PlayerCameraManager->PlayCameraShake(cameraShake, scale);
+	}
 }
 

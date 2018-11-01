@@ -28,7 +28,6 @@ ATube::ATube()
 	created = false;
 	currentPoints = 0;
 	PrimaryActorTick.bCanEverTick = true;
-	srand(time(NULL));
 
 	SetActorEnableCollision(false);
 
@@ -64,11 +63,11 @@ void ATube::InsertNewPoints(float distance)
 
 	//UE_LOG(LogTemp, Display, TEXT("%d %d"), splinePointCount - 2, splinePointCount - 2 % 20);
 	if ((splinePointCount - 2) % 50 == 0) {
-		int randomDirection = rand() % 2;
+		int randomDirection = FMath::Rand() % 2;
 		angleHDest = GetNewRandomAngle();
 		angleVDest = GetNewRandomAngle();
 		angleHDest = randomDirection ? angleHDest : -angleHDest;
-		randomDirection = rand() % 2;
+		randomDirection = FMath::Rand() % 2;
 		angleVDest = randomDirection ? angleVDest : -angleVDest;
 	}
 	float angleHVar = 1;
@@ -107,7 +106,7 @@ void ATube::InsertNewPoints(float distance)
 
 int ATube::GetNewRandomAngle()
 {
-	int random = rand() % 5;
+	int random = FMath::Rand() % 5;
 	float angle = 0;
 	switch (random) {
 	case 0:
@@ -178,15 +177,37 @@ void ATube::CreateSplineMesh()
 		splineMesh->SetStartOffset(FVector2D(-15, 0));
 		splineMesh->SetEndOffset(FVector2D(-15, 0));
 		SplineMesh.Add(splineMesh);
-		if (i != 0 && i % 50 == 0)
+		if (i % 50 == 0)
 		{
 			UWorld* const World = GetWorld();
 			if (World && Obstacles.Num() > 0)
 			{
 				auto transform = Spline->GetTransformAtSplinePoint(i, ESplineCoordinateSpace::World);
 				auto rotation = FRotator(transform.GetRotation()).Add(90, 0, 0);
-				auto actor = World->SpawnActor<AObstacle>(Obstacles[0], transform.GetLocation(), rotation);
-				ObstaclesActor.Add(actor);
+				int obstacle = FMath::Rand() % Obstacles.Num();
+				auto actor = World->SpawnActor<AObstacle>(Obstacles[obstacle], transform.GetLocation(), rotation);
+				if (actor) {
+					int random = FMath::Rand() % 360;
+					auto newRotation = UKismetMathLibrary::ComposeRotators(actor->GetActorRotation(), UKismetMathLibrary::RotatorFromAxisAndAngle(actor->GetActorUpVector(), random));
+					actor->SetActorRotation(newRotation);
+					AObstacle* createObstacle = Cast<AObstacle>(actor);
+					if (createObstacle) {
+						int random = FMath::Rand() % 100;
+						UE_LOG(LogTemp, Display, TEXT("%d"), random);
+						float velocity = 0;
+						if (random < 50) {
+							velocity = 0;
+						}
+						else if (random < 80) {
+							velocity = 0.5;
+						}
+						else {
+							velocity = 1;
+						}
+						createObstacle->rotationVelocity = velocity;
+						ObstaclesActor.Add(actor);
+					}
+				}
 			}
 		}
 	}
