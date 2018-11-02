@@ -60,12 +60,9 @@ void APlayerRider::BeginPlay()
 		break;
 	}
 	auto SplineComponent = tube->GetSpline();
-	distance = SplineComponent->GetSplineLength() * 0.5f;
+	//distance = SplineComponent->GetSplineLength() * 0.5f;
+	distance = 0;
 }
-float lastX = 0;
-float lastY = 0;
-float lastZ = 0;
-
 // Called every frame
 void APlayerRider::Tick(float DeltaTime)
 {
@@ -75,33 +72,30 @@ void APlayerRider::Tick(float DeltaTime)
 	{
 		auto SplineComponent = tube->GetSpline();
 		if (SplineComponent != NULL) {
-			int numberOfSplinePoints = SplineComponent->GetNumberOfSplinePoints();
-			if (numberOfSplinePoints > 100) {
-				float totalLength = SplineComponent->GetSplineLength();
-
-				auto transform = SplineComponent->GetTransformAtDistanceAlongSpline(distance, ESplineCoordinateSpace::World);
-				FVector location = transform.GetLocation();
-				if (!MovementInput.IsZero())
-				{
-					MovementInput = MovementInput.GetSafeNormal();
-					angle += MovementInput.Y * 300 * DeltaTime;
-					angle = (int)angle % 360;
-				}
-				auto vecRight = FRotationMatrix(transform.Rotator()).GetScaledAxis(EAxis::Y);
-				auto vecUp = FRotationMatrix(transform.Rotator()).GetScaledAxis(EAxis::Z);
-				transform.SetLocation(location + (-vecRight * FMath::Cos(FMath::DegreesToRadians(angle)) * 30) + (vecUp * FMath::Sin(FMath::DegreesToRadians(angle)) * 30));
-				SetActorTransform(transform);
-
-				while (distance >= totalLength / 2.0f)
-				{
-					for (int i = 0; i < 4; i++) {
-						tube->InsertNewPoints(distance);
-						totalLength = SplineComponent->GetSplineLength();
-					}
-				}
-				tube->CreateSplineMesh();
-				distance += DeltaTime * playerVelocity;
+			auto transform = SplineComponent->GetTransformAtDistanceAlongSpline(distance, ESplineCoordinateSpace::World);
+			FVector location = transform.GetLocation();
+			if (!MovementInput.IsZero())
+			{
+				MovementInput = MovementInput.GetSafeNormal();
+				angle += MovementInput.Y * 300 * DeltaTime;
+				angle = (int)angle % 360;
 			}
+			auto vecRight = FRotationMatrix(transform.Rotator()).GetScaledAxis(EAxis::Y);
+			auto vecUp = FRotationMatrix(transform.Rotator()).GetScaledAxis(EAxis::Z);
+			transform.SetLocation(location + (-vecRight * FMath::Cos(FMath::DegreesToRadians(angle)) * 30) + (vecUp * FMath::Sin(FMath::DegreesToRadians(angle)) * 30));
+			SetActorTransform(transform);
+			
+			distance += DeltaTime * playerVelocity;
+
+			float firstPointDistance = SplineComponent->GetDistanceAlongSplineAtSplinePoint(1);
+			//UE_LOG(LogTemp, Display, TEXT("%f %f"), distance, firstPointDistance);
+			if (distance > firstPointDistance) {
+				tube->InsertNewPoints(distance);
+				tube->CreateSplineMesh(true);
+				//UE_LOG(LogTemp, Display, TEXT("new distance%f"), distance - firstPointDistance);
+				distance -= firstPointDistance;
+			}
+
 		}
 	}
 }
@@ -121,7 +115,7 @@ void APlayerRider::MoveRight(float AxisValue)
 //Input functions
 void APlayerRider::Shake(float scale)
 {
-	if (cameraShake != NULL)
+	if (tube != NULL && tube->IsReady() && cameraShake != NULL)
 	{
 		GetWorld()->GetFirstPlayerController()->PlayerCameraManager->PlayCameraShake(cameraShake, scale);
 	}

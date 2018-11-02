@@ -25,8 +25,7 @@ ATube::ATube()
 	//Spline->SetCollisionProfileName(FName("OverlapAll"));
 	Spline->SetGenerateOverlapEvents(false);
 
-	created = false;
-	currentPoints = 0;
+	currentPoint = 0;
 	PrimaryActorTick.bCanEverTick = true;
 
 	SetActorEnableCollision(false);
@@ -34,19 +33,25 @@ ATube::ATube()
 	playerDistance = 0;
 
 	removePointIndex = 0;
+
+	insertedPoints = 0;
+
+	initializationSize = 500;
 }
 
 void ATube::BeginPlay()
 {
 	Super::BeginPlay();
+	Spline->ClearSplinePoints();
 	SetActorLocation(FVector::ZeroVector);
 	lastPoint = GetActorLocation();
 	int splinePointCount = Spline->GetNumberOfSplinePoints();
-	while (splinePointCount < 1000)
+	while (splinePointCount < initializationSize)
 	{
 		InsertNewPoints(0);
 		splinePointCount = Spline->GetNumberOfSplinePoints();
 	}
+	CreateSplineMesh(false);
 	isReady = true;
 }
 
@@ -58,11 +63,10 @@ void ATube::Tick(float DeltaTime)
 void ATube::InsertNewPoints(float distance)
 {
 	playerDistance = distance;
-	int splinePointCount = Spline->GetNumberOfSplinePoints();
 	int i = 0;
 
-	//UE_LOG(LogTemp, Display, TEXT("%d %d"), splinePointCount - 2, splinePointCount - 2 % 20);
-	if ((splinePointCount - 2) % 50 == 0) {
+	insertedPoints++;
+	if (insertedPoints % 50 == 0) {
 		int randomDirection = FMath::Rand() % 2;
 		angleHDest = GetNewRandomAngle();
 		angleVDest = GetNewRandomAngle();
@@ -70,10 +74,11 @@ void ATube::InsertNewPoints(float distance)
 		randomDirection = FMath::Rand() % 2;
 		angleVDest = randomDirection ? angleVDest : -angleVDest;
 	}
+
 	float angleHVar = 1;
 	float angleVVar = 1;
 
-	//angleHDest = 90;
+	//angleHDest = 0;
 	//angleVDest = 0;
 
 	if (angleH < angleHDest) {
@@ -89,12 +94,6 @@ void ATube::InsertNewPoints(float distance)
 	else if (angleV > angleVDest) {
 		angleV -= angleVVar;
 	}
-
-	//angleH = FMath::Max(0.f, angleH);
-	//angleH = FMath::Min(180.f, angleH);
-	//angleV = FMath::Max(0.f, angleV);
-	//angleV = FMath::Min(180.f, angleV);
-	//UE_LOG(LogTemp, Display, TEXT("%f %f"), angleH, angleV);
 
 	float newX = FMath::Cos(FMath::DegreesToRadians(angleH)) * 7.0f;
 	float newY = FMath::Sin(FMath::DegreesToRadians(angleH)) * 7.0f;
@@ -128,45 +127,47 @@ int ATube::GetNewRandomAngle()
 	return angle;
 }
 
-void ATube::OnConstruction(const FTransform& Transform)
-{
-	if (!created)
-	{
-		this->CreateSplineMesh();
-	}
-}
-
-void ATube::CreateSplineMesh()
+void ATube::CreateSplineMesh(bool remove)
 {
 	FVector locStart;
 	FVector tanStart;
 	FVector locEnd;
 	FVector tanEnd;
 
-	if (Spline->GetDistanceAlongSplineAtSplinePoint(removePointIndex) < playerDistance && SplineMesh.Num() > 0 && SplineMesh[0])
-	{
-		//UE_LOG(LogTemp, Display, TEXT("in cleaning up %d %d %f %f"), SplineMesh.Num(), removePointIndex, Spline->GetDistanceAlongSplineAtSplinePoint(removePointIndex), playerDistance);
+	//while (Spline->GetDistanceAlongSplineAtSplinePoint(removePointIndex) + 10 < playerDistance && SplineMesh.Num() > 0 && SplineMesh[0])
+	//{
+	//	//UE_LOG(LogTemp, Display, TEXT("cleaning up %d %d %f %f"), SplineMesh.Num(), removePointIndex, Spline->GetDistanceAlongSplineAtSplinePoint(removePointIndex), playerDistance);
+
+	//	//currentPoint--;
+	//}
+
+	//while (Spline->GetDistanceAlongSplineAtSplinePoint(removePointIndex) + 10 < playerDistance )
+	//{
+	if (remove) {
+		Spline->RemoveSplinePoint(0, false);
 		SplineMesh[0]->UnregisterComponent();
 		SplineMesh[0]->DetachFromParent();
 		SplineMesh[0]->DestroyComponent();
 		SplineMesh.RemoveAt(0);
-		removePointIndex++;
-		if (removePointIndex % 50 == 0 && ObstaclesActor.Num() > 0) {
+		if (insertedPoints > (initializationSize * 2) && insertedPoints % 50 == 0 && ObstaclesActor.Num() > 0) {
 			if (ObstaclesActor[0])
 			{
 				ObstaclesActor[0]->Destroy();
 				ObstaclesActor.RemoveAt(0);
 			}
 		}
+		currentPoint--;
 	}
+	//}
 
-	for (int32 i = currentPoints; i < Spline->GetNumberOfSplinePoints() - 1; i++)
+	bool placedObstacle = false;
+	for (; currentPoint < Spline->GetNumberOfSplinePoints() - 1; currentPoint++)
 	{
 		USplineMeshComponent *splineMesh = NewObject<USplineMeshComponent>(this);
 		splineMesh->RegisterComponent();
 		splineMesh->CreationMethod = EComponentCreationMethod::UserConstructionScript;
-		Spline->GetLocationAndTangentAtSplinePoint(i, locStart, tanStart, ESplineCoordinateSpace::Local);
-		Spline->GetLocationAndTangentAtSplinePoint(i + 1, locEnd, tanEnd, ESplineCoordinateSpace::Local);
+		Spline->GetLocationAndTangentAtSplinePoint(currentPoint, locStart, tanStart, ESplineCoordinateSpace::Local);
+		Spline->GetLocationAndTangentAtSplinePoint(currentPoint + 1, locEnd, tanEnd, ESplineCoordinateSpace::Local);
 		splineMesh->bSmoothInterpRollScale = true;
 		splineMesh->SetMobility(EComponentMobility::Type::Movable);
 		splineMesh->SetForwardAxis(ESplineMeshAxis::Y);
@@ -177,23 +178,24 @@ void ATube::CreateSplineMesh()
 		splineMesh->SetStartOffset(FVector2D(-15, 0));
 		splineMesh->SetEndOffset(FVector2D(-15, 0));
 		SplineMesh.Add(splineMesh);
-		if (i % 50 == 0)
+		if (insertedPoints % 50 == 0 && !placedObstacle)
 		{
 			UWorld* const World = GetWorld();
 			if (World && Obstacles.Num() > 0)
 			{
-				auto transform = Spline->GetTransformAtSplinePoint(i, ESplineCoordinateSpace::World);
+				auto transform = Spline->GetTransformAtSplinePoint(currentPoint, ESplineCoordinateSpace::World);
 				auto rotation = FRotator(transform.GetRotation()).Add(90, 0, 0);
 				int obstacle = FMath::Rand() % Obstacles.Num();
 				auto actor = World->SpawnActor<AObstacle>(Obstacles[obstacle], transform.GetLocation(), rotation);
+				//UE_LOG(LogTemp, Display, TEXT("%s %d %s"), *transform.GetLocation().ToCompactString(), i, *actor->GetName());
 				if (actor) {
 					int random = FMath::Rand() % 360;
 					auto newRotation = UKismetMathLibrary::ComposeRotators(actor->GetActorRotation(), UKismetMathLibrary::RotatorFromAxisAndAngle(actor->GetActorUpVector(), random));
+
 					actor->SetActorRotation(newRotation);
 					AObstacle* createObstacle = Cast<AObstacle>(actor);
 					if (createObstacle) {
 						int random = FMath::Rand() % 100;
-						UE_LOG(LogTemp, Display, TEXT("%d"), random);
 						float velocity = 0;
 						if (random < 50) {
 							velocity = 0;
@@ -209,9 +211,7 @@ void ATube::CreateSplineMesh()
 					}
 				}
 			}
+			placedObstacle = true;
 		}
 	}
-
-	currentPoints = Spline->GetNumberOfSplinePoints() - 1;
-	created = true;
 }

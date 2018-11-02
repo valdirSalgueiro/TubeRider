@@ -16,8 +16,6 @@ class TUBERIDER_API ATube : public AActor
 
 public:
 
-	bool created;
-
 	UPROPERTY(EditAnywhere, Category = Mesh)
 		UStaticMesh* Mesh;
 
@@ -41,7 +39,6 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
-	virtual void OnConstruction(const FTransform &Transform) override;
 
 public:
 	// Called every frame
@@ -53,13 +50,13 @@ public:
 		return isReady;
 	}
 
-	void CreateSplineMesh();
+	void CreateSplineMesh(bool remove);
 
 private:
 
 	int GetNewRandomAngle();
 
-	int currentPoints;
+	int currentPoint;
 
 	int yDirection;
 	int zDirection;
@@ -79,4 +76,8 @@ private:
 	int removePointIndex;
 
 	bool isReady;
+
+	int insertedPoints;
+
+	int initializationSize;
 };
