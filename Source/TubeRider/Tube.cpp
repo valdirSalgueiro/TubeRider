@@ -36,12 +36,15 @@ ATube::ATube()
 
 	insertedPoints = 0;
 
-	initializationSize = 500;
+	initializationSize = 1000;
 }
 
 void ATube::BeginPlay()
 {
 	Super::BeginPlay();
+	if (Mesh && Material) {
+		Mesh->SetMaterial(0, Material);
+	}
 	Spline->ClearSplinePoints();
 	SetActorLocation(FVector::ZeroVector);
 	lastPoint = GetActorLocation();

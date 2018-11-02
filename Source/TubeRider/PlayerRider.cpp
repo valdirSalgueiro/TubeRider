@@ -37,8 +37,8 @@ APlayerRider::APlayerRider()
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("GameCamera"));
 	Camera->SetupAttachment(RootComponent);
 
-	auto FlashLightComponent = CreateDefaultSubobject<USpotLightComponent>(TEXT("Flashlight"));
-	FlashLightComponent->SetupAttachment(RootComponent);
+	FlashLightComponent = CreateDefaultSubobject<USpotLightComponent>(TEXT("Flashlight"));
+	FlashLightComponent->SetupAttachment(Camera);
 	FlashLightComponent->RelativeLocation = FVector(10, 0, 4.f);
 	FlashLightComponent->AttenuationRadius = 1000.f;
 	FlashLightComponent->bAffectsWorld = true;

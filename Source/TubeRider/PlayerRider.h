@@ -67,6 +67,9 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Player", meta = (AllowPrivateAccess = "true"))
 	USpringArmComponent* CameraSpringArm;
 
+	UPROPERTY(EditAnywhere, Category = "Player", meta = (AllowPrivateAccess = "true"))
+		USpotLightComponent* FlashLightComponent;
+
 
 
 };
