@@ -80,4 +80,6 @@ private:
 	int insertedPoints;
 
 	int initializationSize;
+
+	int currentSplineMesh;
 };

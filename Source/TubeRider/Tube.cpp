@@ -22,21 +22,16 @@ ATube::ATube()
 	Spline->SetMobility(EComponentMobility::Type::Movable);
 	RootComponent = Spline;
 
-	//Spline->SetCollisionProfileName(FName("OverlapAll"));
 	Spline->SetGenerateOverlapEvents(false);
 
 	currentPoint = 0;
 	PrimaryActorTick.bCanEverTick = true;
-
 	SetActorEnableCollision(false);
-
 	playerDistance = 0;
-
 	removePointIndex = 0;
-
 	insertedPoints = 0;
-
 	initializationSize = 1000;
+	currentSplineMesh = 0;
 }
 
 void ATube::BeginPlay()
@@ -51,6 +46,18 @@ void ATube::BeginPlay()
 	int splinePointCount = Spline->GetNumberOfSplinePoints();
 	while (splinePointCount < initializationSize)
 	{
+		USplineMeshComponent *splineMesh = NewObject<USplineMeshComponent>(this);
+		splineMesh->RegisterComponent();
+		splineMesh->CreationMethod = EComponentCreationMethod::UserConstructionScript;
+		splineMesh->bSmoothInterpRollScale = true;
+		splineMesh->SetMobility(EComponentMobility::Type::Movable);
+		splineMesh->SetForwardAxis(ESplineMeshAxis::Y);
+		splineMesh->SetStaticMesh(Mesh);
+		splineMesh->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+		splineMesh->AttachToComponent(Spline, FAttachmentTransformRules::FAttachmentTransformRules(EAttachmentRule::KeepRelative, true));
+		splineMesh->SetStartOffset(FVector2D(-15, 0));
+		splineMesh->SetEndOffset(FVector2D(-15, 0));
+		SplineMesh.Add(splineMesh);
 		InsertNewPoints(0);
 		splinePointCount = Spline->GetNumberOfSplinePoints();
 	}
@@ -148,10 +155,10 @@ void ATube::CreateSplineMesh(bool remove)
 	//{
 	if (remove) {
 		Spline->RemoveSplinePoint(0, false);
-		SplineMesh[0]->UnregisterComponent();
-		SplineMesh[0]->DetachFromParent();
-		SplineMesh[0]->DestroyComponent();
-		SplineMesh.RemoveAt(0);
+		//SplineMesh[0]->UnregisterComponent();
+		//SplineMesh[0]->DetachFromParent();
+		//SplineMesh[0]->DestroyComponent();
+		//SplineMesh.RemoveAt(0);
 		if (insertedPoints > (initializationSize * 2) && insertedPoints % 50 == 0 && ObstaclesActor.Num() > 0) {
 			if (ObstaclesActor[0])
 			{
@@ -166,21 +173,16 @@ void ATube::CreateSplineMesh(bool remove)
 	bool placedObstacle = false;
 	for (; currentPoint < Spline->GetNumberOfSplinePoints() - 1; currentPoint++)
 	{
-		USplineMeshComponent *splineMesh = NewObject<USplineMeshComponent>(this);
-		splineMesh->RegisterComponent();
-		splineMesh->CreationMethod = EComponentCreationMethod::UserConstructionScript;
 		Spline->GetLocationAndTangentAtSplinePoint(currentPoint, locStart, tanStart, ESplineCoordinateSpace::Local);
-		Spline->GetLocationAndTangentAtSplinePoint(currentPoint + 1, locEnd, tanEnd, ESplineCoordinateSpace::Local);
-		splineMesh->bSmoothInterpRollScale = true;
-		splineMesh->SetMobility(EComponentMobility::Type::Movable);
-		splineMesh->SetForwardAxis(ESplineMeshAxis::Y);
-		splineMesh->SetStaticMesh(Mesh);
+		Spline->GetLocationAndTangentAtSplinePoint(currentPoint + 1, locEnd, tanEnd, ESplineCoordinateSpace::Local);		
+
+		if (currentSplineMesh >= SplineMesh.Num())
+			currentSplineMesh = 0;
+		//UE_LOG(LogTemp, Display, TEXT("%d"), currentSplineMesh);
+		auto splineMesh = SplineMesh[currentSplineMesh++];
 		splineMesh->SetStartAndEnd(locStart, tanStart, locEnd, tanEnd);
-		splineMesh->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-		splineMesh->AttachToComponent(Spline, FAttachmentTransformRules::FAttachmentTransformRules(EAttachmentRule::KeepRelative, true));
 		splineMesh->SetStartOffset(FVector2D(-15, 0));
 		splineMesh->SetEndOffset(FVector2D(-15, 0));
-		SplineMesh.Add(splineMesh);
 		if (insertedPoints % 50 == 0 && !placedObstacle)
 		{
 			UWorld* const World = GetWorld();
