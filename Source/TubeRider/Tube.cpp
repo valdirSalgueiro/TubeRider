@@ -77,19 +77,41 @@ void ATube::InsertNewPoints(float distance)
 
 	insertedPoints++;
 	if (insertedPoints % 50 == 0) {
-		int randomDirection = FMath::Rand() % 2;
 		angleHDest = GetNewRandomAngle();
 		angleVDest = GetNewRandomAngle();
-		angleHDest = randomDirection ? angleHDest : -angleHDest;
-		randomDirection = FMath::Rand() % 2;
-		angleVDest = randomDirection ? angleVDest : -angleVDest;
+		int randomDirection;
+		if (lastPoint.Y < 0 && angleHDest < 0) {
+			UE_LOG(LogTemp, Display, TEXT("lastPoint.Y < 0 angleHDest < 0 %f %f"), lastPoint.Y, angleHDest);
+			angleHDest = -angleHDest;
+		}
+		else if (lastPoint.Y > 500 && angleHDest > 0) {
+			UE_LOG(LogTemp, Display, TEXT("lastPoint.Y > 500 angleHDest > 0 %f %f"), lastPoint.Y, angleHDest);
+			angleHDest = -angleHDest;
+		}
+		else if (lastPoint.Y > 0 && lastPoint.Y < 500) {
+			UE_LOG(LogTemp, Display, TEXT("else %f %f"), lastPoint.Y, angleHDest);
+			randomDirection = FMath::Rand() % 2;
+			angleHDest = randomDirection ? angleHDest : -angleHDest;
+		}
+		
+		if (lastPoint.Z < 0 && angleVDest < 0) {
+			//UE_LOG(LogTemp, Display, TEXT("lastPoint.Z < 0 angleVDest < 0 %f %f"), lastPoint.Z, angleVDest);
+			angleVDest = -angleVDest;
+		}
+		else if (lastPoint.Z > 200 && angleVDest > 0) {
+			//UE_LOG(LogTemp, Display, TEXT("lastPoint.Z > 200 angleVDest > 0 %f %f"), lastPoint.Z, angleVDest);
+			angleVDest = -angleVDest;
+		}
+		else if(lastPoint.Z > 0 && lastPoint.Z < 200)
+		{
+			//UE_LOG(LogTemp, Display, TEXT("else %f %f"), lastPoint.Z, angleVDest);
+			randomDirection = FMath::Rand() % 2;
+			angleVDest = randomDirection ? angleVDest : -angleVDest;
+		}
 	}
 
 	float angleHVar = 1;
 	float angleVVar = 1;
-
-	//angleHDest = 0;
-	//angleVDest = 0;
 
 	if (angleH < angleHDest) {
 		angleH += angleHVar;
@@ -105,33 +127,48 @@ void ATube::InsertNewPoints(float distance)
 		angleV -= angleVVar;
 	}
 
+	//angleHDest = 45;
+
 	float newX = FMath::Cos(FMath::DegreesToRadians(angleH)) * 7.0f;
 	float newY = FMath::Sin(FMath::DegreesToRadians(angleH)) * 7.0f;
 	float newZ = FMath::Sin(FMath::DegreesToRadians(angleV)) * 7.0f;
 	lastPoint += FVector(newX, newY, newZ);
+
 	i++;
 	Spline->AddSplinePoint(lastPoint, ESplineCoordinateSpace::World);
 }
 
 int ATube::GetNewRandomAngle()
 {
-	int random = FMath::Rand() % 5;
+	int random = FMath::Rand() % 6;
 	float angle = 0;
 	switch (random) {
 	case 0:
 		angle = 0;
 		break;
 	case 1:
-		angle = 45;
+		angle = 15;
 		break;
 	case 2:
-		angle = 90;
+		angle = 30;
 		break;
 	case 3:
-		angle = 135;
+		angle = 45;
 		break;
-	default:
-		angle = 180;
+	case 4:
+		angle = 60;
+		break;
+	case 5:
+		angle = 75;
+		break;
+	case 6:
+		angle = 270;
+		break;
+	case 7:
+		angle = 315;
+		break;
+	case 8:
+		angle = 360;
 		break;
 	}
 	return angle;
@@ -174,7 +211,7 @@ void ATube::CreateSplineMesh(bool remove)
 	for (; currentPoint < Spline->GetNumberOfSplinePoints() - 1; currentPoint++)
 	{
 		Spline->GetLocationAndTangentAtSplinePoint(currentPoint, locStart, tanStart, ESplineCoordinateSpace::Local);
-		Spline->GetLocationAndTangentAtSplinePoint(currentPoint + 1, locEnd, tanEnd, ESplineCoordinateSpace::Local);		
+		Spline->GetLocationAndTangentAtSplinePoint(currentPoint + 1, locEnd, tanEnd, ESplineCoordinateSpace::Local);
 
 		if (currentSplineMesh >= SplineMesh.Num())
 			currentSplineMesh = 0;
