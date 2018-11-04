@@ -59,8 +59,6 @@ void APlayerRider::BeginPlay()
 		tube = *ActorItr;
 		break;
 	}
-	auto SplineComponent = tube->GetSpline();
-	//distance = SplineComponent->GetSplineLength() * 0.5f;
 	distance = 0;
 }
 // Called every frame
