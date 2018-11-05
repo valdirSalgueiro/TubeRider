@@ -4,6 +4,7 @@
 
 #include "Runtime/Engine/Classes/Components/SplineMeshComponent.h"
 #include "Runtime/Engine/Classes/Components/SplineComponent.h"
+#include "ObstacleSpawner.h"
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "Obstacle.h"
@@ -15,6 +16,11 @@ class TUBERIDER_API ATube : public AActor
 	GENERATED_BODY()
 
 public:
+
+	struct ObstacleDistance {
+		AObstacle* obstacle;
+		float distance;
+	};
 
 	UPROPERTY(EditAnywhere, Category = Mesh)
 		UStaticMesh* Mesh;
@@ -29,8 +35,6 @@ public:
 	UPROPERTY(EditAnywhere, Category = Obstacle)
 		UMaterial* Material;
 
-	TArray<AActor*> ObstaclesActor;
-
 	ATube();
 
 	USplineComponent* GetSpline() {
@@ -44,6 +48,8 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+	void GetNewAngle();
+
 	void InsertNewPoints(float distance);
 
 	bool IsReady() {
@@ -55,6 +61,8 @@ public:
 private:
 
 	int GetNewRandomAngle();
+	void GetHorizontalAngle();
+	void GetVerticalAngle();
 
 	int currentPoint;
 
@@ -65,21 +73,20 @@ private:
 	FVector lastPoint;
 	float angleH;
 	float angleV;
-	float angleHDest;
-	float angleVDest;
+	int angleHDest;
+	int angleVDest;
 
 	float xDir;
 	float yDir;	
 
-	float playerDistance;
-
 	int removePointIndex;
-
 	bool isReady;
-
-	int insertedPoints;
-
+	float elapsedSeconds;
 	int initializationSize;
-
 	int currentSplineMesh;
+
+	ObstacleSpawner* spawner;
+	UWorld* world;
+
+	TArray<ObstacleDistance> ObstaclesActor;
 };

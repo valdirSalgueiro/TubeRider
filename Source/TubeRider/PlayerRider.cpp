@@ -17,19 +17,7 @@ APlayerRider::APlayerRider()
 	SphereComponent->SetHiddenInGame(true);
 	SphereComponent->SetSimulatePhysics(false);
 	SphereComponent->SetEnableGravity(false);
-	//SetActorRelativeLocation(FVector(60, 0, 0));
 
-	// debug visual
-	//UStaticMeshComponent* SphereVisual = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("VisualRepresentation"));
-	//SphereVisual->SetupAttachment(RootComponent);
-	//static ConstructorHelpers::FObjectFinder<UStaticMesh>SphereVisualAsset(TEXT("/Game/StarterContent/Shapes/Shape_Sphere.Shape_Sphere"));
-	//if (SphereVisualAsset.Succeeded())
-	//{
-	//	SphereVisual->SetStaticMesh(SphereVisualAsset.Object);
-	//	SphereVisual->SetRelativeLocation(FVector(0.0f, 0.0f, -15.0f));
-	//	SphereVisual->SetWorldScale3D(FVector(0.3f));
-	//	SphereVisual->SetGenerateOverlapEvents(false);
-	//}
 
 	CameraSpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraSpringArm"));
 	CameraSpringArm->SetupAttachment(RootComponent);

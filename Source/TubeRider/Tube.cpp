@@ -27,16 +27,27 @@ ATube::ATube()
 	currentPoint = 0;
 	PrimaryActorTick.bCanEverTick = true;
 	SetActorEnableCollision(false);
-	playerDistance = 0;
 	removePointIndex = 0;
-	insertedPoints = 0;
-	initializationSize = 1000;
+	elapsedSeconds = 0;
+	initializationSize = 50;
 	currentSplineMesh = 0;
+
+	angleHDest = 0;
+	angleVDest = 0;
+
+	angleH = 0;
+	angleV = 0;
+
+
+	if (spawner == NULL) {
+		spawner = new ObstacleSpawner();
+	}	
 }
 
 void ATube::BeginPlay()
 {
 	Super::BeginPlay();
+	world = GetWorld();
 	if (Mesh && Material) {
 		Mesh->SetMaterial(0, Material);
 	}
@@ -68,56 +79,63 @@ void ATube::BeginPlay()
 void ATube::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	elapsedSeconds += DeltaTime;
+}
+
+void ATube::GetNewAngle()
+{
+	GetHorizontalAngle();
+	GetVerticalAngle();
+}
+
+void ATube::GetHorizontalAngle()
+{
+	int randomDirection;
+	angleHDest = GetNewRandomAngle();
+	if (lastPoint.Y < 0 && angleHDest < 0) {
+		angleHDest = -angleHDest;
+	}
+	else if (lastPoint.Y > 500 && angleHDest > 0) {
+		angleHDest = -angleHDest;
+	}
+	else if (lastPoint.Y > 0 && lastPoint.Y < 500) {
+		randomDirection = FMath::Rand() % 2;
+		angleHDest = randomDirection ? angleHDest : -angleHDest;
+	}
+}
+
+void ATube::GetVerticalAngle()
+{
+	int randomDirection;
+	angleVDest = GetNewRandomAngle();
+
+	if (lastPoint.Z < 0 && angleVDest < 0) {
+		angleVDest = -angleVDest;
+	}
+	else if (lastPoint.Z > 200 && angleVDest > 0) {
+		angleVDest = -angleVDest;
+	}
+	else if (lastPoint.Z > 0 && lastPoint.Z < 200)
+	{
+		randomDirection = FMath::Rand() % 2;
+		angleVDest = randomDirection ? angleVDest : -angleVDest;
+	}
 }
 
 void ATube::InsertNewPoints(float distance)
 {
-	playerDistance = distance;
-	int i = 0;
-
-	insertedPoints++;
-	if (insertedPoints % 50 == 0) {
-		angleHDest = GetNewRandomAngle();
-		angleVDest = GetNewRandomAngle();
-		int randomDirection;
-		if (lastPoint.Y < 0 && angleHDest < 0) {
-			UE_LOG(LogTemp, Display, TEXT("lastPoint.Y < 0 angleHDest < 0 %f %f"), lastPoint.Y, angleHDest);
-			angleHDest = -angleHDest;
-		}
-		else if (lastPoint.Y > 500 && angleHDest > 0) {
-			UE_LOG(LogTemp, Display, TEXT("lastPoint.Y > 500 angleHDest > 0 %f %f"), lastPoint.Y, angleHDest);
-			angleHDest = -angleHDest;
-		}
-		else if (lastPoint.Y > 0 && lastPoint.Y < 500) {
-			UE_LOG(LogTemp, Display, TEXT("else %f %f"), lastPoint.Y, angleHDest);
-			randomDirection = FMath::Rand() % 2;
-			angleHDest = randomDirection ? angleHDest : -angleHDest;
-		}
-		
-		if (lastPoint.Z < 0 && angleVDest < 0) {
-			//UE_LOG(LogTemp, Display, TEXT("lastPoint.Z < 0 angleVDest < 0 %f %f"), lastPoint.Z, angleVDest);
-			angleVDest = -angleVDest;
-		}
-		else if (lastPoint.Z > 200 && angleVDest > 0) {
-			//UE_LOG(LogTemp, Display, TEXT("lastPoint.Z > 200 angleVDest > 0 %f %f"), lastPoint.Z, angleVDest);
-			angleVDest = -angleVDest;
-		}
-		else if(lastPoint.Z > 0 && lastPoint.Z < 200)
-		{
-			//UE_LOG(LogTemp, Display, TEXT("else %f %f"), lastPoint.Z, angleVDest);
-			randomDirection = FMath::Rand() % 2;
-			angleVDest = randomDirection ? angleVDest : -angleVDest;
-		}
-	}
-
-	float angleHVar = 1;
-	float angleVVar = 1;
+	float angleHVar = 1.5f;
+	float angleVVar = 1.5f;
 
 	if (angleH < angleHDest) {
 		angleH += angleHVar;
 	}
 	else if (angleH > angleHDest) {
 		angleH -= angleHVar;
+	}
+	else
+	{
+		GetHorizontalAngle();
 	}
 
 	if (angleV < angleVDest) {
@@ -126,15 +144,20 @@ void ATube::InsertNewPoints(float distance)
 	else if (angleV > angleVDest) {
 		angleV -= angleVVar;
 	}
+	else
+	{
+		GetVerticalAngle();
+	}/*
 
-	//angleHDest = 45;
-
+	if (angleH == angleHDest && angleV == angleVDest)
+	{
+		GetNewAngle();
+	}*/
 	float newX = FMath::Cos(FMath::DegreesToRadians(angleH)) * 7.0f;
 	float newY = FMath::Sin(FMath::DegreesToRadians(angleH)) * 7.0f;
 	float newZ = FMath::Sin(FMath::DegreesToRadians(angleV)) * 7.0f;
 	lastPoint += FVector(newX, newY, newZ);
 
-	i++;
 	Spline->AddSplinePoint(lastPoint, ESplineCoordinateSpace::World);
 }
 
@@ -162,12 +185,15 @@ int ATube::GetNewRandomAngle()
 		angle = 75;
 		break;
 	case 6:
-		angle = 270;
+		angle = 89;
 		break;
 	case 7:
-		angle = 315;
+		angle = 270;
 		break;
 	case 8:
+		angle = 315;
+		break;
+	case 9:
 		angle = 360;
 		break;
 	}
@@ -181,33 +207,21 @@ void ATube::CreateSplineMesh(bool remove)
 	FVector locEnd;
 	FVector tanEnd;
 
-	//while (Spline->GetDistanceAlongSplineAtSplinePoint(removePointIndex) + 10 < playerDistance && SplineMesh.Num() > 0 && SplineMesh[0])
-	//{
-	//	//UE_LOG(LogTemp, Display, TEXT("cleaning up %d %d %f %f"), SplineMesh.Num(), removePointIndex, Spline->GetDistanceAlongSplineAtSplinePoint(removePointIndex), playerDistance);
 
-	//	//currentPoint--;
-	//}
 
-	//while (Spline->GetDistanceAlongSplineAtSplinePoint(removePointIndex) + 10 < playerDistance )
-	//{
 	if (remove) {
+		float removedSplineDistance = Spline->GetDistanceAlongSplineAtSplinePoint(0);
 		Spline->RemoveSplinePoint(0, false);
-		//SplineMesh[0]->UnregisterComponent();
-		//SplineMesh[0]->DetachFromParent();
-		//SplineMesh[0]->DestroyComponent();
-		//SplineMesh.RemoveAt(0);
-		if (insertedPoints > (initializationSize * 2) && insertedPoints % 50 == 0 && ObstaclesActor.Num() > 0) {
-			if (ObstaclesActor[0])
+		if (ObstaclesActor.Num() > 0) {
+			if (ObstaclesActor[0].obstacle && ObstaclesActor[0].distance < removedSplineDistance)
 			{
-				ObstaclesActor[0]->Destroy();
+				ObstaclesActor[0].obstacle->Destroy();
 				ObstaclesActor.RemoveAt(0);
 			}
 		}
 		currentPoint--;
 	}
-	//}
 
-	bool placedObstacle = false;
 	for (; currentPoint < Spline->GetNumberOfSplinePoints() - 1; currentPoint++)
 	{
 		Spline->GetLocationAndTangentAtSplinePoint(currentPoint, locStart, tanStart, ESplineCoordinateSpace::Local);
@@ -215,45 +229,19 @@ void ATube::CreateSplineMesh(bool remove)
 
 		if (currentSplineMesh >= SplineMesh.Num())
 			currentSplineMesh = 0;
-		//UE_LOG(LogTemp, Display, TEXT("%d"), currentSplineMesh);
 		auto splineMesh = SplineMesh[currentSplineMesh++];
 		splineMesh->SetStartAndEnd(locStart, tanStart, locEnd, tanEnd);
 		splineMesh->SetStartOffset(FVector2D(-15, 0));
 		splineMesh->SetEndOffset(FVector2D(-15, 0));
-		if (insertedPoints % 50 == 0 && !placedObstacle)
-		{
-			UWorld* const World = GetWorld();
-			if (World && Obstacles.Num() > 0)
-			{
-				auto transform = Spline->GetTransformAtSplinePoint(currentPoint, ESplineCoordinateSpace::World);
-				auto rotation = FRotator(transform.GetRotation()).Add(90, 0, 0);
-				int obstacle = FMath::Rand() % Obstacles.Num();
-				auto actor = World->SpawnActor<AObstacle>(Obstacles[obstacle], transform.GetLocation(), rotation);
-				//UE_LOG(LogTemp, Display, TEXT("%s %d %s"), *transform.GetLocation().ToCompactString(), i, *actor->GetName());
-				if (actor) {
-					int random = FMath::Rand() % 360;
-					auto newRotation = UKismetMathLibrary::ComposeRotators(actor->GetActorRotation(), UKismetMathLibrary::RotatorFromAxisAndAngle(actor->GetActorUpVector(), random));
+	}
 
-					actor->SetActorRotation(newRotation);
-					AObstacle* createObstacle = Cast<AObstacle>(actor);
-					if (createObstacle) {
-						int random = FMath::Rand() % 100;
-						float velocity = 0;
-						if (random < 50) {
-							velocity = 0;
-						}
-						else if (random < 80) {
-							velocity = 0.5;
-						}
-						else {
-							velocity = 1;
-						}
-						createObstacle->rotationVelocity = velocity;
-						ObstaclesActor.Add(actor);
-					}
-				}
-			}
-			placedObstacle = true;
-		}
+	auto obstacle = spawner->SpawnObject(world, Spline, Obstacles, currentPoint, elapsedSeconds);
+	if (obstacle)
+	{
+		float distance = Spline->GetDistanceAlongSplineAtSplinePoint(currentPoint);
+		ObstacleDistance newObstacle;
+		newObstacle.distance = distance;
+		newObstacle.obstacle = obstacle;
+		ObstaclesActor.Add(newObstacle);
 	}
 }
