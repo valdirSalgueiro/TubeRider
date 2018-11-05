@@ -5,6 +5,7 @@
 #include "Runtime/Engine/Classes/Components/SplineMeshComponent.h"
 #include "Runtime/Engine/Classes/Components/SplineComponent.h"
 #include "Obstacle.h"
+#include "GameplaySettings.h"
 #include "CoreMinimal.h"
 
 /**
@@ -16,10 +17,12 @@ public:
 	ObstacleSpawner();
 	~ObstacleSpawner();
 
-	AObstacle*  SpawnObject(UWorld* world, USplineComponent* Spline, TArray<TSubclassOf<AObstacle>> obstacles, int currentPoint, int elapsedSeconds);
+	AObstacle*  SpawnObject(UWorld* world, USplineComponent* Spline, TArray<TSubclassOf<AObstacle>> obstacles, int currentPoint, float elapsedSeconds);
 
 private:
+	GameplaySettings* gameplaySettings;
+
 	float difficulty;
 
-	int lastPlacedSecond;
+	float lastPlacedSecond;
 };

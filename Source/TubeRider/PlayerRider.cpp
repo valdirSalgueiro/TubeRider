@@ -7,6 +7,8 @@
 // Sets default values
 APlayerRider::APlayerRider()
 {
+	settings = GameplaySettings::GetSettings();
+
 	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 	AutoPossessPlayer = EAutoReceiveInput::Player0;
@@ -34,8 +36,7 @@ APlayerRider::APlayerRider()
 
 	angle = 90;
 	distance = 0;
-	playerVelocity = 300;
-
+	playerVelocity = settings->playerInitialVelocity;
 }
 
 // Called when the game starts or when spawned
@@ -53,6 +54,9 @@ void APlayerRider::BeginPlay()
 void APlayerRider::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	settings->update(DeltaTime);
+
+	playerVelocity = settings->lerpPlayerVelocity();
 
 	if (tube != NULL && tube->IsReady())
 	{

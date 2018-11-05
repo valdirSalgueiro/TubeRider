@@ -13,6 +13,7 @@
 #include "Runtime/CoreUObject/Public/UObject/ConstructorHelpers.h" 
 #include "Runtime/Engine/Public/EngineUtils.h"
 #include "Runtime/Engine/Classes/Camera/CameraShake.h"
+#include "GameplaySettings.h"
 #include "PlayerRider.generated.h"
 
 UCLASS()
@@ -70,6 +71,5 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Player", meta = (AllowPrivateAccess = "true"))
 		USpotLightComponent* FlashLightComponent;
 
-
-
+	GameplaySettings* settings;
 };

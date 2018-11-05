@@ -3,19 +3,23 @@
 #include "ObstacleSpawner.h"
 #include "Runtime/Core/Public/Math/UnrealMathUtility.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "GameplaySettings.h"
 
 ObstacleSpawner::ObstacleSpawner()
 {
 	lastPlacedSecond = 0;
+	gameplaySettings = GameplaySettings::GetSettings();
 }
 
 ObstacleSpawner::~ObstacleSpawner()
 {
 }
 
-AObstacle* ObstacleSpawner::SpawnObject(UWorld* World, USplineComponent* Spline, TArray<TSubclassOf<AObstacle>> Obstacles, int currentPoint, int elapsedSeconds) {
+AObstacle* ObstacleSpawner::SpawnObject(UWorld* World, USplineComponent* Spline, TArray<TSubclassOf<AObstacle>> Obstacles, int currentPoint, float elapsedSeconds) {
 	AObstacle* newObstacle = NULL;
-	if (elapsedSeconds != lastPlacedSecond && elapsedSeconds % 1 == 0)
+	float obstacleInterval = gameplaySettings->lerpObstacleInterval();
+	UE_LOG(LogTemp, Display, TEXT("%f"), obstacleInterval);
+	if (elapsedSeconds > lastPlacedSecond + obstacleInterval)
 	{
 		if (World && Obstacles.Num() > 0)
 		{
