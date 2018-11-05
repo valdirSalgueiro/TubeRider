@@ -10,18 +10,14 @@
 #include "Obstacle.h"
 #include "Tube.generated.h"
 
+class APlayerRider;
+
 UCLASS()
 class TUBERIDER_API ATube : public AActor
 {
 	GENERATED_BODY()
 
 public:
-
-	struct ObstacleDistance {
-		AObstacle* obstacle;
-		float distance;
-	};
-
 	UPROPERTY(EditAnywhere, Category = Mesh)
 		UStaticMesh* Mesh;
 
@@ -58,6 +54,10 @@ public:
 
 	void CreateSplineMesh(bool remove);
 
+	void SetPlayer(APlayerRider* _player) {
+		player = _player;
+	}
+
 private:
 
 	int GetNewRandomAngle();
@@ -88,5 +88,5 @@ private:
 	ObstacleSpawner* spawner;
 	UWorld* world;
 
-	TArray<ObstacleDistance> ObstaclesActor;
+	APlayerRider* player;
 };

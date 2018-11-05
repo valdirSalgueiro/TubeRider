@@ -46,6 +46,7 @@ void APlayerRider::BeginPlay()
 	for (TActorIterator<ATube> ActorItr(GetWorld()); ActorItr; ++ActorItr)
 	{
 		tube = *ActorItr;
+		tube->SetPlayer(this);
 		break;
 	}
 	distance = 0;

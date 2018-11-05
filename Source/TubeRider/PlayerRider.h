@@ -40,6 +40,10 @@ public:
 	
 	void Shake(float scale);
 
+	float GetAngle() {
+		return angle;
+	}
+
 protected:
 
 	float distance;

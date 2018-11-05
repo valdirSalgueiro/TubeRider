@@ -21,6 +21,9 @@ void GameplaySettings::update(float DeltaTime)
 	time += DeltaTime;
 }
 
+float GameplaySettings::lerpDifficulty() {
+	return FMath::Min(1.f, time / maxSeconds);
+}
 
 float GameplaySettings::lerpPlayerVelocity() {
 	return Utils::map(time, initialSeconds, maxSeconds, playerInitialVelocity, playerMaxVelocity);

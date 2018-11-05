@@ -30,6 +30,7 @@ public:
 
 	float lerpPlayerVelocity();
 	float lerpObstacleInterval();
+	float lerpDifficulty();
 
 	void update(float DeltaTime);
 

@@ -14,10 +14,13 @@
 class TUBERIDER_API ObstacleSpawner
 {
 public:
+
 	ObstacleSpawner();
 	~ObstacleSpawner();
 
-	AObstacle*  SpawnObject(UWorld* world, USplineComponent* Spline, TArray<TSubclassOf<AObstacle>> obstacles, int currentPoint, float elapsedSeconds);
+	void SpawnObjects(UWorld* world, USplineComponent* Spline, TArray<TSubclassOf<AObstacle>> obstacles, float playerAngle, int currentPoint, float elapsedSeconds);
+
+	void SpawnObstacles(UWorld * World, TArray<TSubclassOf<AObstacle>> &Obstacles, float playerAngle, FTransform &transform, FRotator &rotation);
 
 private:
 	GameplaySettings* gameplaySettings;

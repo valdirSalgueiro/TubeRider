@@ -11,6 +11,7 @@
 #include "Runtime/Engine/Classes/Engine/StaticMesh.h"
 #include "Runtime/CoreUObject/Public/UObject/ConstructorHelpers.h"
 #include "Runtime/Core/Public/Math/UnrealMathUtility.h"
+#include "PlayerRider.h"
 #include <time.h>
 
 
@@ -41,7 +42,7 @@ ATube::ATube()
 
 	if (spawner == NULL) {
 		spawner = new ObstacleSpawner();
-	}	
+	}
 }
 
 void ATube::BeginPlay()
@@ -207,18 +208,8 @@ void ATube::CreateSplineMesh(bool remove)
 	FVector locEnd;
 	FVector tanEnd;
 
-
-
 	if (remove) {
-		float removedSplineDistance = Spline->GetDistanceAlongSplineAtSplinePoint(0);
 		Spline->RemoveSplinePoint(0, false);
-		if (ObstaclesActor.Num() > 0) {
-			if (ObstaclesActor[0].obstacle && ObstaclesActor[0].distance < removedSplineDistance)
-			{
-				ObstaclesActor[0].obstacle->Destroy();
-				ObstaclesActor.RemoveAt(0);
-			}
-		}
 		currentPoint--;
 	}
 
@@ -235,13 +226,7 @@ void ATube::CreateSplineMesh(bool remove)
 		splineMesh->SetEndOffset(FVector2D(-15, 0));
 	}
 
-	auto obstacle = spawner->SpawnObject(world, Spline, Obstacles, currentPoint, elapsedSeconds);
-	if (obstacle)
-	{
-		float distance = Spline->GetDistanceAlongSplineAtSplinePoint(currentPoint);
-		ObstacleDistance newObstacle;
-		newObstacle.distance = distance;
-		newObstacle.obstacle = obstacle;
-		ObstaclesActor.Add(newObstacle);
+	if (player) {
+		spawner->SpawnObjects(world, Spline, Obstacles, player->GetAngle(), currentPoint, elapsedSeconds);
 	}
 }
