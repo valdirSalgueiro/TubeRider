@@ -26,7 +26,7 @@ void AObstacle::BeginPlay()
 	Super::BeginPlay();
 	ObstacleMesh->GetBodySetup()->CollisionTraceFlag = ECollisionTraceFlag::CTF_UseSimpleAsComplex;
 	ObstacleMesh->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-	ObstacleMesh->SetCollisionResponseToAllChannels(ECR_Overlap);
+	ObstacleMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECR_Overlap);
 	ObstacleMesh->SetMobility(EComponentMobility::Movable);
 	ObstacleMesh->SetGenerateOverlapEvents(true);
 	ObstacleMesh->SetSimulatePhysics(false);
@@ -46,8 +46,6 @@ void AObstacle::Tick(float DeltaTime)
 
 void AObstacle::HandleCollision(UPrimitiveComponent* OverlappedComponent, AActor* Other, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& OverlapInfo)
 {
-	FString name = Other->GetName();
-	UE_LOG(LogTemp, Display, TEXT("colidiu: %s"), *name);
 	APlayerRider* player = Cast<APlayerRider>(Other);
 	if (player != NULL) {
 		player->Shake(1.f);

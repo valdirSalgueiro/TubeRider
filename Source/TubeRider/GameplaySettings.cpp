@@ -7,18 +7,29 @@ GameplaySettings* GameplaySettings::instance = NULL;
 GameplaySettings::GameplaySettings()
 {
 	playerInitialVelocity = 100.f;
-	playerMaxVelocity = 300.f;
+	playerMaxVelocity = 250.f;
+	//playerMaxVelocity = 300.f;
 
 	initialObstacleInterval = 3.f;
-	maxObstacleInterval = .1f;
+	maxObstacleInterval = 2.f;
 
 	initialSeconds = 0.f;
 	maxSeconds = 100.f;
+
+	initialLifeSpan=20.f;
+	maxLifeSpan=initialLifeSpan*playerInitialVelocity/playerMaxVelocity;
+
+	time = 0.f;
+}
+
+void GameplaySettings::start() {
+	time = 0.f;
 }
 
 void GameplaySettings::update(float DeltaTime)
 {
 	time += DeltaTime;
+	time = FMath::Min(maxSeconds, time);
 }
 
 float GameplaySettings::lerpDifficulty() {
@@ -31,6 +42,10 @@ float GameplaySettings::lerpPlayerVelocity() {
 
 float GameplaySettings::lerpObstacleInterval() {
 	return Utils::map(time, initialSeconds, maxSeconds, initialObstacleInterval, maxObstacleInterval);
+}
+
+float GameplaySettings::lerpTimeSpan() {
+	return Utils::map(time, initialSeconds, maxSeconds, initialLifeSpan, maxLifeSpan);
 }
 
 GameplaySettings::~GameplaySettings()

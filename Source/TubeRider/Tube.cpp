@@ -30,7 +30,7 @@ ATube::ATube()
 	SetActorEnableCollision(false);
 	removePointIndex = 0;
 	elapsedSeconds = 0;
-	initializationSize = 50;
+	initializationSize = 200;
 	currentSplineMesh = 0;
 
 	angleHDest = 0;
@@ -48,9 +48,10 @@ ATube::ATube()
 void ATube::BeginPlay()
 {
 	Super::BeginPlay();
+	elapsedSeconds = 0;
 	world = GetWorld();
 	if (Mesh && Material) {
-		Mesh->SetMaterial(0, Material);
+		//Mesh->SetMaterial(0, Material);
 	}
 	Spline->ClearSplinePoints();
 	SetActorLocation(FVector::ZeroVector);
@@ -125,8 +126,8 @@ void ATube::GetVerticalAngle()
 
 void ATube::InsertNewPoints(float distance)
 {
-	float angleHVar = 1.5f;
-	float angleVVar = 1.5f;
+	float angleHVar = 1.f;
+	float angleVVar = 1.f;
 
 	if (angleH < angleHDest) {
 		angleH += angleHVar;
@@ -135,9 +136,10 @@ void ATube::InsertNewPoints(float distance)
 		angleH -= angleHVar;
 	}
 	else
-	{
+	{		
 		GetHorizontalAngle();
 	}
+	//UE_LOG(LogTemp, Display, TEXT("angleH %f %f"), angleH, distance);
 
 	if (angleV < angleVDest) {
 		angleV += angleVVar;
@@ -147,9 +149,12 @@ void ATube::InsertNewPoints(float distance)
 	}
 	else
 	{
+		//UE_LOG(LogTemp, Display, TEXT("%f %f"), angleV, angleVDest);
 		GetVerticalAngle();
-	}/*
-
+	}
+	//angleHDest = 89;
+	//angleVDest = 0;
+	/*
 	if (angleH == angleHDest && angleV == angleVDest)
 	{
 		GetNewAngle();

@@ -9,6 +9,9 @@ ObstacleSpawner::ObstacleSpawner()
 {
 	lastPlacedSecond = 0;
 	gameplaySettings = GameplaySettings::GetSettings();
+	minVelocity = 0.2f;
+	midVelocity = 0.3f;
+	maxVelocity = 0.5f;
 }
 
 ObstacleSpawner::~ObstacleSpawner()
@@ -34,32 +37,142 @@ void ObstacleSpawner::SpawnObstacles(UWorld * World, TArray<TSubclassOf<AObstacl
 	auto rotation = FRotator(initialTransform.GetRotation()).Add(90, 0, 0);
 
 	int difficulty = gameplaySettings->lerpDifficulty() * 100;
+	UE_LOG(LogTemp, Display, TEXT("diff: %d"), difficulty);
+
 
 	if (difficulty > 80) {
-		int random = FMath::Rand() % 2;
+		int random = FMath::Rand() % 10;
 		if (random == 0)
 		{
-			SpawnDifficulty5(World, Obstacles, initialTransform, rotation, initialDistance, Spline, 1.f);
+			int randomDirection = FMath::Rand() % 3;
+			float velocity = 0;
+			switch (randomDirection) {
+			case 0:
+				velocity = 0;
+				break;
+			case 1:
+				velocity = midVelocity;
+				break;
+			case 2:
+				velocity = -midVelocity;
+				break;
+			}
+			SpawnDifficulty5(World, Obstacles, initialTransform, rotation, initialDistance, Spline, velocity);
 		}
 		else if (random == 1)
 		{
-			SpawnDifficulty4(World, Obstacles, initialTransform, rotation, initialDistance, Spline, 1.f);
+			int randomDirection = FMath::Rand() % 2;
+			float velocity = 0;
+			switch (randomDirection) {
+			case 0:
+				velocity = 0;
+				break;
+			case 1:
+				velocity = maxVelocity;
+				break;
+			case 2:
+				velocity = -maxVelocity;
+				break;
+			}
+			SpawnDifficulty4(World, Obstacles, initialTransform, rotation, initialDistance, Spline, velocity);
+		}
+		else if (random == 2)
+		{
+			int angle = 0;
+			int randomDirection = FMath::Rand() % 2;
+			float velocity = 0;
+			switch (randomDirection) {
+			case 0:
+				velocity = 0;
+				break;
+			case 1:
+				velocity = midVelocity;
+				break;
+			case 2:
+				velocity = -midVelocity;
+				break;
+			}
+			for (int i = 0; i < 3; i++)
+			{
+				SpawnDifficulty1_(World, Obstacles, 0, initialTransform, rotation, angle, velocity);
+				SpawnDifficulty1_(World, Obstacles, 0, initialTransform, rotation, angle + 180, velocity);
+				initialDistance -= 30;
+				initialTransform = Spline->GetTransformAtDistanceAlongSpline(initialDistance, ESplineCoordinateSpace::World);
+			}
+		}
+		else if (random == 3)
+		{
+			int angle = 0;
+			for (int i = 0; i < 5; i++)
+			{
+				SpawnDifficulty1_(World, Obstacles, 0, initialTransform, rotation, angle, -midVelocity);
+				SpawnDifficulty1_(World, Obstacles, 0, initialTransform, rotation, angle + 180, -midVelocity);
+				initialDistance -= 30;
+				initialTransform = Spline->GetTransformAtDistanceAlongSpline(initialDistance, ESplineCoordinateSpace::World);
+			}
+		}
+		else
+		{
+			int angle = FMath::Rand() % 360;
+			for (int i = 0; i < 10; i++)
+			{
+				SpawnDifficulty1_(World, Obstacles, 0, initialTransform, rotation, angle, 0);
+				SpawnDifficulty1_(World, Obstacles, 0, initialTransform, rotation, angle + 180, 0);
+				initialDistance -= 30;
+				initialTransform = Spline->GetTransformAtDistanceAlongSpline(initialDistance, ESplineCoordinateSpace::World);
+			}
 		}
 	}
-	if (difficulty > 50)
+	else if (difficulty > 70)
 	{
-		SpawnDifficulty5(World, Obstacles, initialTransform, rotation, initialDistance, Spline, 0.5f);
+		int angle = 0;
+		int randomDirection = FMath::Rand() % 2;
+		float velocity = 0;
+		switch (randomDirection) {
+		case 0:
+			velocity = 0;
+			break;
+		case 1:
+			velocity = midVelocity;
+			break;
+		case 2:
+			velocity = -midVelocity;
+			break;
+		}
+		for (int i = 0; i < 3; i++)
+		{
+			SpawnDifficulty1_(World, Obstacles, 1, initialTransform, rotation, angle, velocity);
+			initialDistance -= 30;
+			initialTransform = Spline->GetTransformAtDistanceAlongSpline(initialDistance, ESplineCoordinateSpace::World);
+		}
+	}
+	else if (difficulty > 50)
+	{
+		int randomDirection = FMath::Rand() % 2;
+		float velocity = 0;
+		switch (randomDirection) {
+		case 0:
+			velocity = 0;
+			break;
+		case 1:
+			velocity = minVelocity;
+			break;
+		case 2:
+			velocity = -minVelocity;
+			break;
+		}
+		SpawnDifficulty5(World, Obstacles, initialTransform, rotation, initialDistance, Spline, velocity);
 	}
 	else if (difficulty > 40)
 	{
 		int random = FMath::Rand() % 3;
 		if (random == 0)
 		{
-			SpawnDifficulty4(World, Obstacles, initialTransform, rotation, initialDistance, Spline, 0.5f);
+			SpawnDifficulty4(World, Obstacles, initialTransform, rotation, initialDistance, Spline, minVelocity);
 		}
 		else if (random == 1)
 		{
-			SpawnDifficulty4(World, Obstacles, initialTransform, rotation, initialDistance, Spline, 1.f);
+			SpawnDifficulty4(World, Obstacles, initialTransform, rotation, initialDistance, Spline, -midVelocity);
 		}
 		else
 		{
@@ -68,7 +181,20 @@ void ObstacleSpawner::SpawnObstacles(UWorld * World, TArray<TSubclassOf<AObstacl
 	}
 	else if (difficulty > 30)
 	{
-		SpawnDifficulty4(World, Obstacles, initialTransform, rotation, initialDistance, Spline, 0.5f);
+		int randomDirection = FMath::Rand() % 2;
+		float velocity = 0;
+		switch (randomDirection) {
+		case 0:
+			velocity = 0;
+			break;
+		case 1:
+			velocity = minVelocity;
+			break;
+		case 2:
+			velocity = -minVelocity;
+			break;
+		}
+		SpawnDifficulty4(World, Obstacles, initialTransform, rotation, initialDistance, Spline, velocity);
 	}
 	else if (difficulty > 20)
 	{
@@ -90,68 +216,20 @@ void ObstacleSpawner::SpawnDifficulty5(UWorld * World, TArray<TSubclassOf<AObsta
 	int random = FMath::Rand() % 4;
 	if (random == 0)
 	{
-		for (int i = 0; i < 5; i++)
-		{
-			SpawnDifficulty1_(World, Obstacles, 0, initialTransform, rotation, angle, velocity);
-			SpawnDifficulty1_(World, Obstacles, 0, initialTransform, rotation, angle+180, velocity);
-			initialDistance += 50;
-			angle += 10;
-			initialTransform = Spline->GetTransformAtDistanceAlongSpline(initialDistance, ESplineCoordinateSpace::World);
-		}
+		SpawnDifficulty1_(World, Obstacles, 0, initialTransform, rotation, angle, velocity);
+		SpawnDifficulty1_(World, Obstacles, 0, initialTransform, rotation, angle + 180, velocity);
 	}
 	else if (random == 1) {
-		for (int i = 0; i < 2; i++)
-		{
-			SpawnDifficulty1_(World, Obstacles, 0, initialTransform, rotation, angle, velocity);
-			SpawnDifficulty1_(World, Obstacles, 0, initialTransform, rotation, angle + 180, velocity);
-			initialDistance += 50;
-			angle += 10;
-			initialTransform = Spline->GetTransformAtDistanceAlongSpline(initialDistance, ESplineCoordinateSpace::World);
-		}
-		for (int i = 0; i < 3; i++)
-		{
-			SpawnDifficulty1_(World, Obstacles, 0, initialTransform, rotation, angle, velocity);
-			SpawnDifficulty1_(World, Obstacles, 0, initialTransform, rotation, angle + 180, velocity);
-			initialDistance += 50;
-			angle -= 10;
-			initialTransform = Spline->GetTransformAtDistanceAlongSpline(initialDistance, ESplineCoordinateSpace::World);
-		}
+		SpawnDifficulty1_(World, Obstacles, 0, initialTransform, rotation, angle, -velocity);
+		SpawnDifficulty1_(World, Obstacles, 0, initialTransform, rotation, angle + 180, -velocity);
 	}
 	else if (random == 2) {
-		for (int i = 0; i < 2; i++)
-		{
-			SpawnDifficulty1_(World, Obstacles, 0, initialTransform, rotation, angle, velocity);
-			SpawnDifficulty1_(World, Obstacles, 0, initialTransform, rotation, angle + 180, velocity);
-			initialDistance += 50;
-			angle += 30;
-			initialTransform = Spline->GetTransformAtDistanceAlongSpline(initialDistance, ESplineCoordinateSpace::World);
-		}
-		for (int i = 0; i < 3; i++)
-		{
-			SpawnDifficulty1_(World, Obstacles, 0, initialTransform, rotation, angle, velocity);
-			SpawnDifficulty1_(World, Obstacles, 0, initialTransform, rotation, angle + 180, velocity);
-			initialDistance -= 50;
-			angle += 30;
-			initialTransform = Spline->GetTransformAtDistanceAlongSpline(initialDistance, ESplineCoordinateSpace::World);
-		}
+		SpawnDifficulty1_(World, Obstacles, 0, initialTransform, rotation, angle, velocity);
+		SpawnDifficulty1_(World, Obstacles, 0, initialTransform, rotation, angle + 180, velocity);
 	}
 	else if (random == 3) {
-		for (int i = 0; i < 2; i++)
-		{
-			SpawnDifficulty1_(World, Obstacles, 0, initialTransform, rotation, angle, velocity);
-			SpawnDifficulty1_(World, Obstacles, 0, initialTransform, rotation, angle + 270, velocity);
-			initialDistance += 50;
-			angle += 30;
-			initialTransform = Spline->GetTransformAtDistanceAlongSpline(initialDistance, ESplineCoordinateSpace::World);
-		}
-		for (int i = 0; i < 3; i++)
-		{
-			SpawnDifficulty1_(World, Obstacles, 0, initialTransform, rotation, angle, velocity);
-			SpawnDifficulty1_(World, Obstacles, 0, initialTransform, rotation, angle + 270, velocity);
-			initialDistance -= 50;
-			angle += 30;
-			initialTransform = Spline->GetTransformAtDistanceAlongSpline(initialDistance, ESplineCoordinateSpace::World);
-		}
+		SpawnDifficulty1_(World, Obstacles, 0, initialTransform, rotation, angle, -velocity);
+		SpawnDifficulty1_(World, Obstacles, 0, initialTransform, rotation, angle + 270, -velocity);
 	}
 }
 
@@ -159,12 +237,13 @@ void ObstacleSpawner::SpawnDifficulty4(UWorld * World, TArray<TSubclassOf<AObsta
 {
 	int angle = FMath::Rand() % 360;
 	int random = FMath::Rand() % 3;
+	int randomObstacle = FMath::Rand() % 2;
 	if (random == 0)
 	{
-		for (int i = 0; i < 5; i++)
+		for (int i = 0; i < 3; i++)
 		{
-			SpawnDifficulty1(World, Obstacles, initialTransform, rotation, angle, velocity);
-			initialDistance += 50;
+			SpawnDifficulty1_(World, Obstacles, randomObstacle, initialTransform, rotation, angle, velocity);
+			initialDistance -= 10;
 			angle += 10;
 			initialTransform = Spline->GetTransformAtDistanceAlongSpline(initialDistance, ESplineCoordinateSpace::World);
 		}
@@ -172,15 +251,8 @@ void ObstacleSpawner::SpawnDifficulty4(UWorld * World, TArray<TSubclassOf<AObsta
 	else if (random == 1) {
 		for (int i = 0; i < 2; i++)
 		{
-			SpawnDifficulty1(World, Obstacles, initialTransform, rotation, angle, velocity);
-			initialDistance += 50;
-			angle += 10;
-			initialTransform = Spline->GetTransformAtDistanceAlongSpline(initialDistance, ESplineCoordinateSpace::World);
-		}
-		for (int i = 0; i < 3; i++)
-		{
-			SpawnDifficulty1(World, Obstacles, initialTransform, rotation, angle, velocity);
-			initialDistance += 50;
+			SpawnDifficulty1_(World, Obstacles, randomObstacle, initialTransform, rotation, angle, -velocity);
+			initialDistance -= 10;
 			angle -= 10;
 			initialTransform = Spline->GetTransformAtDistanceAlongSpline(initialDistance, ESplineCoordinateSpace::World);
 		}
@@ -188,15 +260,8 @@ void ObstacleSpawner::SpawnDifficulty4(UWorld * World, TArray<TSubclassOf<AObsta
 	else if (random == 2) {
 		for (int i = 0; i < 2; i++)
 		{
-			SpawnDifficulty1(World, Obstacles, initialTransform, rotation, angle, velocity);
-			initialDistance += 50;
-			angle += 30;
-			initialTransform = Spline->GetTransformAtDistanceAlongSpline(initialDistance, ESplineCoordinateSpace::World);
-		}
-		for (int i = 0; i < 3; i++)
-		{
-			SpawnDifficulty1(World, Obstacles, initialTransform, rotation, angle, velocity);
-			initialDistance -= 50;
+			SpawnDifficulty1_(World, Obstacles, randomObstacle, initialTransform, rotation, angle, velocity);
+			initialDistance -= 10;
 			angle += 30;
 			initialTransform = Spline->GetTransformAtDistanceAlongSpline(initialDistance, ESplineCoordinateSpace::World);
 		}
@@ -205,7 +270,9 @@ void ObstacleSpawner::SpawnDifficulty4(UWorld * World, TArray<TSubclassOf<AObsta
 
 void ObstacleSpawner::SpawnDifficulty3(TArray<TSubclassOf<AObstacle>> & Obstacles, UWorld * World, FTransform &initialTransform, FRotator &rotation)
 {
-	float velocity = 1;
+	float velocity = maxVelocity;
+	int randomDirection = FMath::Rand() % 2;
+	velocity = randomDirection ? velocity : -velocity;
 	int obstacle = FMath::Rand() % Obstacles.Num();
 	int angle = FMath::Rand() % 360;
 	auto newObstacle = SpawnSingleObstacle(World, Obstacles, obstacle, initialTransform, rotation, velocity);
@@ -219,10 +286,10 @@ void ObstacleSpawner::SpawnDifficulty2(TArray<TSubclassOf<AObstacle>> & Obstacle
 	int random = FMath::Rand() % 100;
 	float velocity = 0;
 	if (random < 80) {
-		velocity = 0.5;
+		velocity = minVelocity;
 	}
 	else {
-		velocity = 1;
+		velocity = midVelocity;
 	}
 
 	int obstacle = FMath::Rand() % Obstacles.Num();
@@ -235,12 +302,12 @@ void ObstacleSpawner::SpawnDifficulty1(UWorld * World, TArray<TSubclassOf<AObsta
 {
 	int obstacle = FMath::Rand() % 2;
 	if (!obstacle)
-		SpawnDifficulty1_(World, Obstacles, 0, initialTransform, rotation, velocity, angle);
-	else 
-		SpawnDifficulty1_(World, Obstacles, 1, initialTransform, rotation, velocity, angle);
+		SpawnDifficulty1_(World, Obstacles, 0, initialTransform, rotation, angle, velocity);
+	else
+		SpawnDifficulty1_(World, Obstacles, 1, initialTransform, rotation, angle, velocity);
 }
 
-void ObstacleSpawner::SpawnDifficulty1_(UWorld * World, TArray<TSubclassOf<AObstacle>> & Obstacles, int obstacle, FTransform & initialTransform, FRotator & rotation, float velocity, int angle)
+void ObstacleSpawner::SpawnDifficulty1_(UWorld * World, TArray<TSubclassOf<AObstacle>> & Obstacles, int obstacle, FTransform & initialTransform, FRotator & rotation, int angle, float velocity)
 {
 	auto newObstacle = SpawnSingleObstacle(World, Obstacles, obstacle, initialTransform, rotation, velocity);
 	auto newRotation = UKismetMathLibrary::ComposeRotators(newObstacle->GetActorRotation(), UKismetMathLibrary::RotatorFromAxisAndAngle(newObstacle->GetActorUpVector(), angle));
@@ -251,10 +318,11 @@ AObstacle* ObstacleSpawner::SpawnSingleObstacle(UWorld * World, TArray<TSubclass
 {
 	AObstacle* newObstacle = World->SpawnActor<AObstacle>(Obstacles[obstacle], transform.GetLocation(), rotation);
 	if (newObstacle) {
-		newObstacle->SetLifeSpan(10);
-		if (newObstacle) {
-
+		newObstacle->SetLifeSpan(gameplaySettings->lerpTimeSpan());
+		if (newObstacle)
+		{
 			newObstacle->rotationVelocity = velocity;
 		}
 	}
+	return newObstacle;
 }

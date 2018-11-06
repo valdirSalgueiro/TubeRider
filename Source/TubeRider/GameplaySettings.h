@@ -31,8 +31,10 @@ public:
 	float lerpPlayerVelocity();
 	float lerpObstacleInterval();
 	float lerpDifficulty();
+	float lerpTimeSpan();
 
 	void update(float DeltaTime);
+	void start();
 
 
 	float playerInitialVelocity;
@@ -43,6 +45,9 @@ public:
 
 	float initialSeconds;
 	float maxSeconds;
+
+	float initialLifeSpan;
+	float maxLifeSpan;
 
 private:
 	GameplaySettings();

@@ -2,6 +2,7 @@
 
 #include "PlayerRider.h"
 #include "Runtime/Engine/Classes/GameFramework/PlayerController.h"
+#include "Kismet/KismetMathLibrary.h"
 
 
 // Sets default values
@@ -49,6 +50,7 @@ void APlayerRider::BeginPlay()
 		tube->SetPlayer(this);
 		break;
 	}
+	settings->start();
 	distance = 0;
 }
 // Called every frame
@@ -68,12 +70,14 @@ void APlayerRider::Tick(float DeltaTime)
 			if (!MovementInput.IsZero())
 			{
 				MovementInput = MovementInput.GetSafeNormal();
-				angle += MovementInput.Y * 300 * DeltaTime;
+				angle += MovementInput.Y * 200 * DeltaTime;
 				angle = (int)angle % 360;
 			}
 			auto vecRight = FRotationMatrix(transform.Rotator()).GetScaledAxis(EAxis::Y);
 			auto vecUp = FRotationMatrix(transform.Rotator()).GetScaledAxis(EAxis::Z);
-			transform.SetLocation(location + (-vecRight * FMath::Cos(FMath::DegreesToRadians(angle)) * 30) + (vecUp * FMath::Sin(FMath::DegreesToRadians(angle)) * 30));
+			transform.SetLocation(location + (-vecRight * FMath::Cos(FMath::DegreesToRadians(angle)) * 20) + (vecUp * FMath::Sin(FMath::DegreesToRadians(angle)) * 20));
+			//auto newRotation = UKismetMathLibrary::ComposeRotators(transform.Rotator(), UKismetMathLibrary::RotatorFromAxisAndAngle(GetActorUpVector(), 180));
+			transform.SetRotation(FRotator(transform.GetRotation()).Add(0, 0, angle - 90).Quaternion());
 			SetActorTransform(transform);
 			
 			distance += DeltaTime * playerVelocity;

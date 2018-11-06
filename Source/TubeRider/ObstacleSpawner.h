@@ -32,7 +32,7 @@ public:
 
 	void SpawnDifficulty1(UWorld * World, TArray<TSubclassOf<AObstacle>> & Obstacles, FTransform &initialTransform, FRotator &rotation, int angle, float velocity);
 
-	void SpawnDifficulty1_(UWorld * World, TArray<TSubclassOf<AObstacle>> & Obstacles, int obstacle, FTransform & initialTransform, FRotator & rotation, float velocity, int angle);
+	void SpawnDifficulty1_(UWorld * World, TArray<TSubclassOf<AObstacle>> & Obstacles, int obstacle, FTransform & initialTransform, FRotator & rotation, int angle, float velocity);
 
 	AObstacle* SpawnSingleObstacle(UWorld * World, TArray<TSubclassOf<AObstacle>> & Obstacles, int obstacle, FTransform & transform, FRotator & rotation, float velocity);
 
@@ -42,4 +42,7 @@ private:
 	float difficulty;
 
 	float lastPlacedSecond;
+	float minVelocity;
+	float midVelocity;
+	float maxVelocity;
 };
