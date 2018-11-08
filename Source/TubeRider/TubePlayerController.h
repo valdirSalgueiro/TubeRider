@@ -15,4 +15,8 @@ class TUBERIDER_API ATubePlayerController : public APlayerController
 	GENERATED_BODY()
 public:
 	virtual void BeginPlay() override;
+	// Called to bind functionality to input
+	virtual void SetupInputComponent() override;
+	void Cancel();
+
 };

@@ -59,7 +59,7 @@ void ATube::NextMainMenuScreen()
 		case 1:
 			Menu->SetText(FText::FromString("Tela 2"));
 			Menu->FadeIn();
-			GetWorldTimerManager().SetTimer(menuTimer, this, &ATube::NextMainMenuScreen, 5.f, false);
+			GetWorldTimerManager().SetTimer(menuTimer, this, &ATube::NextMainMenuScreen, 1.f, false);
 			break;
 		case 2:
 			Menu->FadeOut();
@@ -75,6 +75,7 @@ void ATube::NextMainMenuScreen()
 			GetWorldTimerManager().SetTimer(menuTimer, this, &ATube::NextMainMenuScreen, 1.f, false);
 			break;
 		case 5:
+			Menu->Teardown();
 			gameInstance->SetGameStarted(true);
 			break;
 	}
