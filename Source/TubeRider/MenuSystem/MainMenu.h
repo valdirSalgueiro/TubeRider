@@ -13,49 +13,24 @@ UCLASS()
 class TUBERIDER_API UMainMenu : public UMenuWidget
 {
 	GENERATED_BODY()
+
+public:
+	UFUNCTION(BlueprintCallable)
+	void SetText(const FText& text);
+	UFUNCTION(BlueprintCallable)
+	void FadeIn();
+	UFUNCTION(BlueprintCallable)
+	void FadeOut();
+
 protected:
 	virtual bool Initialize();
 
+
 private:
 	UPROPERTY(meta = (BindWidget))
-	class UButton* HostButton;
-	
-	UPROPERTY(meta = (BindWidget))
-	class UButton* JoinButton;
+	class UTextBlock* TextIntro;
 
-	UPROPERTY(meta = (BindWidget))
-	class UButton* QuitButton;
-
-	UPROPERTY(meta = (BindWidget))
-	class UButton* CancelJoinMenuButton;
-
-	UPROPERTY(meta = (BindWidget))
-	class UButton* ConfirmJoinMenuButton;
-
-	UPROPERTY(meta = (BindWidget))
-	class UWidgetSwitcher* MenuSwitcher;
-
-	UPROPERTY(meta = (BindWidget))
-	class UWidget* MainMenu;
-
-	UPROPERTY(meta = (BindWidget))
-	class UWidget* JoinMenu;
-
-	UPROPERTY(meta = (BindWidget))
-	class UEditableTextBox* IPAddressField;
-
-	//UFUNCTION()
-	//void HostServer();
-
-	//UFUNCTION()
-	//void JoinServer();
-
-
-	//UFUNCTION()
-	//void OpenJoinMenu();
-
-	//UFUNCTION()
-	//void OpenMainMenu();
+	TMap<FName, UWidgetAnimation*> animations;
 
 	//UFUNCTION()
 	//void QuitPressed();

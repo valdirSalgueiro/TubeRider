@@ -23,14 +23,19 @@ public:
 	virtual void Init();
 
 	UFUNCTION(BlueprintCallable)
-		void LoadMenu();
+		UMainMenu* LoadMenu();
+
+	UFUNCTION(BlueprintCallable)
+		void NextScreen();
 
 private:
 	TSubclassOf<class UUserWidget> MenuClass;
 	//TSubclassOf<class UUserWidget> InGameMenuClass;
 	WidgetController* controller;
 
-	class UUserWidget* Menu;
+	class UMainMenu* Menu;
 
-	
+	int currentScreen;
+
+	FTimerHandle timer;
 };
