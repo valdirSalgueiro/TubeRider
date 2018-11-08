@@ -5,7 +5,6 @@
 #include "CoreMinimal.h"
 #include "Engine/GameInstance.h"
 #include "MenuSystem/MenuInterface.h"
-#include "MenuSystem/WidgetController.h"
 #include "TubeRiderGameInstance.generated.h"
 
 /**
@@ -22,6 +21,10 @@ public:
 
 	virtual void Init();
 
+	void SetGameStarted(bool started);
+
+	bool HasGameStarted();
+
 	UFUNCTION(BlueprintCallable)
 		UMainMenu* LoadMenu();
 
@@ -31,11 +34,12 @@ public:
 private:
 	TSubclassOf<class UUserWidget> MenuClass;
 	//TSubclassOf<class UUserWidget> InGameMenuClass;
-	WidgetController* controller;
 
 	class UMainMenu* Menu;
 
 	int currentScreen;
 
 	FTimerHandle timer;
+
+	bool gameStarted;
 };

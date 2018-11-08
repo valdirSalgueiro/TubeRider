@@ -14,9 +14,19 @@ UTubeRiderGameInstance::UTubeRiderGameInstance(const FObjectInitializer & Object
 	if (!ensure(MenuBPClass.Class != nullptr)) return;
 
 	MenuClass = MenuBPClass.Class;
-	controller = new WidgetController();
 
 	currentScreen = 0;
+	gameStarted = false;
+}
+
+void UTubeRiderGameInstance::SetGameStarted(bool started)
+{
+	gameStarted = started;
+}
+
+bool UTubeRiderGameInstance::HasGameStarted()
+{
+	return gameStarted;
 }
 
 void UTubeRiderGameInstance::Init()
@@ -32,8 +42,6 @@ UMainMenu* UTubeRiderGameInstance::LoadMenu()
 	if (!ensure(Menu != nullptr)) return nullptr;
 	Menu->Setup();
 	Menu->SetMenuInterface(this);
-
-	//controller->Setup(Menu, GetWorld());
 	return Menu;
 }
 
@@ -41,6 +49,4 @@ void UTubeRiderGameInstance::NextScreen()
 {
 	currentScreen++;
 	if (!ensure(Menu != nullptr)) return;
-
-	//controller->Setup(Menu, GetWorld());
 }

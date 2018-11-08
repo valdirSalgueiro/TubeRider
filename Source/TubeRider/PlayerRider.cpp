@@ -57,12 +57,11 @@ void APlayerRider::BeginPlay()
 void APlayerRider::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	settings->update(DeltaTime);
-
-	playerVelocity = settings->lerpPlayerVelocity();
-
 	if (tube != NULL && tube->IsReady())
 	{
+		settings->update(DeltaTime);
+		playerVelocity = settings->lerpPlayerVelocity();
+
 		auto SplineComponent = tube->GetSpline();
 		if (SplineComponent != NULL) {
 			auto transform = SplineComponent->GetTransformAtDistanceAlongSpline(distance, ESplineCoordinateSpace::World);

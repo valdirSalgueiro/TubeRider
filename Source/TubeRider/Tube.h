@@ -8,6 +8,8 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "Obstacle.h"
+#include "TubeRiderGameInstance.h"
+#include "MenuSystem/MainMenu.h"
 #include "Tube.generated.h"
 
 class APlayerRider;
@@ -63,6 +65,7 @@ private:
 	int GetNewRandomAngle();
 	void GetHorizontalAngle();
 	void GetVerticalAngle();
+	void NextMainMenuScreen();
 
 	int currentPoint;
 
@@ -88,5 +91,11 @@ private:
 	ObstacleSpawner* spawner;
 	UWorld* world;
 
+	UTubeRiderGameInstance* gameInstance;
 	APlayerRider* player;
+
+	UMainMenu* Menu;
+	FTimerHandle menuTimer;
+
+	int currentScreen;
 };

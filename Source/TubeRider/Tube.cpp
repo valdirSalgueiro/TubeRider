@@ -11,6 +11,7 @@
 #include "Runtime/Engine/Classes/Engine/StaticMesh.h"
 #include "Runtime/CoreUObject/Public/UObject/ConstructorHelpers.h"
 #include "Runtime/Core/Public/Math/UnrealMathUtility.h"
+#include "Runtime/Engine/Public/TimerManager.h"
 #include "PlayerRider.h"
 #include <time.h>
 
@@ -38,21 +39,63 @@ ATube::ATube()
 
 	angleH = 0;
 	angleV = 0;
-
+	currentScreen = 0;
 
 	if (spawner == NULL) {
 		spawner = new ObstacleSpawner();
 	}
+
+
+}
+
+void ATube::NextMainMenuScreen()
+{
+	//UE_LOG(LogTemp, Display, TEXT("NextMainMenu"));
+	switch (currentScreen) {
+		case 0:
+			Menu->FadeOut();
+			GetWorldTimerManager().SetTimer(menuTimer, this, &ATube::NextMainMenuScreen, 1.f, false);
+			break;
+		case 1:
+			Menu->SetText(FText::FromString("Tela 2"));
+			Menu->FadeIn();
+			GetWorldTimerManager().SetTimer(menuTimer, this, &ATube::NextMainMenuScreen, 5.f, false);
+			break;
+		case 2:
+			Menu->FadeOut();
+			GetWorldTimerManager().SetTimer(menuTimer, this, &ATube::NextMainMenuScreen, 1.f, false);
+			break;
+		case 3:
+			Menu->SetText(FText::FromString("Main Menu"));
+			Menu->FadeIn();
+			GetWorldTimerManager().SetTimer(menuTimer, this, &ATube::NextMainMenuScreen, 1.f, false);
+			break;
+		case 4:
+			Menu->FadeOut();
+			GetWorldTimerManager().SetTimer(menuTimer, this, &ATube::NextMainMenuScreen, 1.f, false);
+			break;
+		case 5:
+			gameInstance->SetGameStarted(true);
+			break;
+	}
+	currentScreen++;
+	//gameInstance->SetGameStarted(true);
 }
 
 void ATube::BeginPlay()
 {
 	Super::BeginPlay();
+	if (gameInstance == NULL) {
+		gameInstance = Cast<UTubeRiderGameInstance>(GetGameInstance());
+		Menu = gameInstance->LoadMenu();
+		Menu->SetText(FText::FromString("Tela 1"));
+		Menu->FadeIn();
+		GetWorldTimerManager().SetTimer(menuTimer, this, &ATube::NextMainMenuScreen, 1.f, false);
+		//gameInstance->SetGameStarted(true);
+	}
+
 	elapsedSeconds = 0;
 	world = GetWorld();
-	if (Mesh && Material) {
-		//Mesh->SetMaterial(0, Material);
-	}
 	Spline->ClearSplinePoints();
 	SetActorLocation(FVector::ZeroVector);
 	lastPoint = GetActorLocation();
@@ -74,13 +117,19 @@ void ATube::BeginPlay()
 		InsertNewPoints(0);
 		splinePointCount = Spline->GetNumberOfSplinePoints();
 	}
-	CreateSplineMesh(false);
-	isReady = true;
+	
 }
 
 void ATube::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	if (!gameInstance->HasGameStarted()) {
+		return;
+	}
+	if (!isReady) {
+		CreateSplineMesh(false);
+		isReady = true;
+	}
 	elapsedSeconds += DeltaTime;
 }
 
@@ -136,7 +185,7 @@ void ATube::InsertNewPoints(float distance)
 		angleH -= angleHVar;
 	}
 	else
-	{		
+	{
 		GetHorizontalAngle();
 	}
 	//UE_LOG(LogTemp, Display, TEXT("angleH %f %f"), angleH, distance);
