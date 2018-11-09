@@ -7,6 +7,7 @@
 #include "Components/WidgetSwitcher.h"
 #include "Components/EditableTextBox.h"
 #include "UMG/Public/Animation/WidgetAnimation.h"
+#include "TubeRiderGameInstance.h"
 
 bool UMainMenu::Initialize()
 {
@@ -42,8 +43,11 @@ bool UMainMenu::Initialize()
 		prop = prop->PropertyLinkNext;
 	}
 	
-	//if (!ensure(HostButton != nullptr)) return false;
-	//HostButton->OnClicked.AddDynamic(this, &UMainMenu::HostServer);
+	if (!ensure(Quit != nullptr)) return false;
+	Quit->OnClicked.AddDynamic(this, &UMainMenu::QuitPressed);
+
+	if (!ensure(Start != nullptr)) return false;
+	Start->OnClicked.AddDynamic(this, &UMainMenu::StartGamePressed);
 
 	return true;
 }
@@ -59,21 +63,27 @@ void UMainMenu::SetText(const FText& text) {
 	TextIntro->SetText(text);
 }
 
-//
-//void UMainMenu::OpenJoinMenu()
-//{
-//	if (!ensure(MenuSwitcher != nullptr)) return;
-//	if (!ensure(JoinMenu != nullptr)) return;
-//	MenuSwitcher->SetActiveWidget(JoinMenu);
-//}
 
-//void UMainMenu::QuitPressed()
-//{
-//	UWorld* World = GetWorld();
-//	if (!ensure(World != nullptr)) return;
-//
-//	APlayerController* PlayerController = World->GetFirstPlayerController();
-//	if (!ensure(PlayerController != nullptr)) return;
-//
-//	PlayerController->ConsoleCommand("quit");
-//}
+void UMainMenu::OpenMainMenu()
+{
+	if (!ensure(MenuSwitcher != nullptr)) return;
+	if (!ensure(MainMenu != nullptr)) return;
+	MenuSwitcher->SetActiveWidget(MainMenu);
+}
+
+void UMainMenu::StartGamePressed()
+{
+	Teardown();
+	Cast<UTubeRiderGameInstance>(GetGameInstance())->SetGameStarted(true);
+}
+
+void UMainMenu::QuitPressed()
+{
+	UWorld* World = GetWorld();
+	if (!ensure(World != nullptr)) return;
+
+	APlayerController* PlayerController = World->GetFirstPlayerController();
+	if (!ensure(PlayerController != nullptr)) return;
+
+	PlayerController->ConsoleCommand("quit");
+}

@@ -50,33 +50,35 @@ ATube::ATube()
 
 void ATube::NextMainMenuScreen()
 {
+	float timer = 0.5f;
+
 	//UE_LOG(LogTemp, Display, TEXT("NextMainMenu"));
 	switch (currentScreen) {
 		case 0:
 			Menu->FadeOut();
-			GetWorldTimerManager().SetTimer(menuTimer, this, &ATube::NextMainMenuScreen, 1.f, false);
+			GetWorldTimerManager().SetTimer(menuTimer, this, &ATube::NextMainMenuScreen, timer, false);
 			break;
 		case 1:
 			Menu->SetText(FText::FromString("Tela 2"));
 			Menu->FadeIn();
-			GetWorldTimerManager().SetTimer(menuTimer, this, &ATube::NextMainMenuScreen, 1.f, false);
+			GetWorldTimerManager().SetTimer(menuTimer, this, &ATube::NextMainMenuScreen, timer, false);
 			break;
 		case 2:
 			Menu->FadeOut();
-			GetWorldTimerManager().SetTimer(menuTimer, this, &ATube::NextMainMenuScreen, 1.f, false);
+			GetWorldTimerManager().SetTimer(menuTimer, this, &ATube::NextMainMenuScreen, timer, false);
 			break;
 		case 3:
 			Menu->SetText(FText::FromString("Main Menu"));
 			Menu->FadeIn();
-			GetWorldTimerManager().SetTimer(menuTimer, this, &ATube::NextMainMenuScreen, 1.f, false);
+			GetWorldTimerManager().SetTimer(menuTimer, this, &ATube::NextMainMenuScreen, timer, false);
 			break;
 		case 4:
 			Menu->FadeOut();
-			GetWorldTimerManager().SetTimer(menuTimer, this, &ATube::NextMainMenuScreen, 1.f, false);
+			GetWorldTimerManager().SetTimer(menuTimer, this, &ATube::NextMainMenuScreen, timer, false);
 			break;
 		case 5:
-			Menu->Teardown();
-			gameInstance->SetGameStarted(true);
+			Menu->OpenMainMenu();
+			Menu->FadeIn();
 			break;
 	}
 	currentScreen++;

@@ -21,6 +21,10 @@ public:
 	void FadeIn();
 	UFUNCTION(BlueprintCallable)
 	void FadeOut();
+	UFUNCTION()
+	void OpenMainMenu();
+
+
 
 protected:
 	virtual bool Initialize();
@@ -47,6 +51,10 @@ private:
 
 	TMap<FName, UWidgetAnimation*> animations;
 
-	//UFUNCTION()
-	//void QuitPressed();
+	UFUNCTION()
+	void QuitPressed();
+
+	UFUNCTION()
+	void StartGamePressed();
+
 };
