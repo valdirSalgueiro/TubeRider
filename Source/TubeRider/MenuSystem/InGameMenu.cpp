@@ -9,11 +9,11 @@ bool UInGameMenu::Initialize()
 	bool Success = Super::Initialize();
 	if (!Success) return false;
 
-	if (!ensure(CancelButton != nullptr)) return false;
-	CancelButton->OnClicked.AddDynamic(this, &UInGameMenu::CancelPressed);
+	if (!ensure(Cancel != nullptr)) return false;
+	Cancel->OnClicked.AddDynamic(this, &UInGameMenu::CancelPressed);
 
-	if (!ensure(QuitButton != nullptr)) return false;
-	QuitButton->OnClicked.AddDynamic(this, &UInGameMenu::QuitPressed);
+	if (!ensure(Quit != nullptr)) return false;
+	Quit->OnClicked.AddDynamic(this, &UInGameMenu::QuitPressed);
 
 	return true;
 }

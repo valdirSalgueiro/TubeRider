@@ -28,7 +28,22 @@ protected:
 
 private:
 	UPROPERTY(meta = (BindWidget))
+	class UWidgetSwitcher* MenuSwitcher;
+
+	UPROPERTY(meta = (BindWidget))
+	class UWidget* Screens;
+
+	UPROPERTY(meta = (BindWidget))
 	class UTextBlock* TextIntro;
+
+	UPROPERTY(meta = (BindWidget))
+	class UWidget* MainMenu;
+
+	UPROPERTY(meta = (BindWidget))
+	class UButton* Start;
+
+	UPROPERTY(meta = (BindWidget))
+	class UButton* Quit;
 
 	TMap<FName, UWidgetAnimation*> animations;
 

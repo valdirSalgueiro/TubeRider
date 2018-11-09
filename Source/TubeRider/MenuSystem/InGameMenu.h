@@ -18,10 +18,10 @@ protected:
 
 private:
 	UPROPERTY(meta = (BindWidget))
-	class UButton* CancelButton;
+	class UButton* Cancel;
 
 	UPROPERTY(meta = (BindWidget))
-	class UButton* QuitButton;
+	class UButton* Quit;
 
 	UFUNCTION()
 	void CancelPressed();
