@@ -75,18 +75,15 @@ void APlayerRider::Tick(float DeltaTime)
 			auto vecRight = FRotationMatrix(transform.Rotator()).GetScaledAxis(EAxis::Y);
 			auto vecUp = FRotationMatrix(transform.Rotator()).GetScaledAxis(EAxis::Z);
 			transform.SetLocation(location + (-vecRight * FMath::Cos(FMath::DegreesToRadians(angle)) * 20) + (vecUp * FMath::Sin(FMath::DegreesToRadians(angle)) * 20));
-			//auto newRotation = UKismetMathLibrary::ComposeRotators(transform.Rotator(), UKismetMathLibrary::RotatorFromAxisAndAngle(GetActorUpVector(), 180));
 			transform.SetRotation(FRotator(transform.GetRotation()).Add(0, 0, angle - 90).Quaternion());
 			SetActorTransform(transform);
 			
 			distance += DeltaTime * playerVelocity;
 
 			float firstPointDistance = SplineComponent->GetDistanceAlongSplineAtSplinePoint(1);
-			//UE_LOG(LogTemp, Display, TEXT("%f %f"), distance, firstPointDistance);
 			if (distance > firstPointDistance) {
 				tube->InsertNewPoints(distance);
 				tube->CreateSplineMesh(true);
-				//UE_LOG(LogTemp, Display, TEXT("new distance%f"), distance - firstPointDistance);
 				distance -= firstPointDistance;
 			}
 

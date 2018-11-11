@@ -31,7 +31,7 @@ ATube::ATube()
 	SetActorEnableCollision(false);
 	removePointIndex = 0;
 	elapsedSeconds = 0;
-	initializationSize = 200;
+	initializationSize = 500;
 	currentSplineMesh = 0;
 
 	angleHDest = 0;
@@ -44,8 +44,6 @@ ATube::ATube()
 	if (spawner == NULL) {
 		spawner = new ObstacleSpawner();
 	}
-
-
 }
 
 void ATube::NextMainMenuScreen()
@@ -59,7 +57,7 @@ void ATube::NextMainMenuScreen()
 			GetWorldTimerManager().SetTimer(menuTimer, this, &ATube::NextMainMenuScreen, timer, false);
 			break;
 		case 1:
-			Menu->SetText(FText::FromString("Tela 2"));
+			Menu->SetText(FText::FromString("Some citizens found a way to protest riding those tubes. Trying to punish anyone who tries riding the government has created death traps... all of them deceased by those traps, but not you. The last..."));
 			Menu->FadeIn();
 			GetWorldTimerManager().SetTimer(menuTimer, this, &ATube::NextMainMenuScreen, timer, false);
 			break;
@@ -68,21 +66,11 @@ void ATube::NextMainMenuScreen()
 			GetWorldTimerManager().SetTimer(menuTimer, this, &ATube::NextMainMenuScreen, timer, false);
 			break;
 		case 3:
-			Menu->SetText(FText::FromString("Main Menu"));
-			Menu->FadeIn();
-			GetWorldTimerManager().SetTimer(menuTimer, this, &ATube::NextMainMenuScreen, timer, false);
-			break;
-		case 4:
-			Menu->FadeOut();
-			GetWorldTimerManager().SetTimer(menuTimer, this, &ATube::NextMainMenuScreen, timer, false);
-			break;
-		case 5:
 			Menu->OpenMainMenu();
 			Menu->FadeIn();
 			break;
 	}
 	currentScreen++;
-	//gameInstance->SetGameStarted(true);
 }
 
 void ATube::BeginPlay()
@@ -91,10 +79,9 @@ void ATube::BeginPlay()
 	if (gameInstance == NULL) {
 		gameInstance = Cast<UTubeRiderGameInstance>(GetGameInstance());
 		Menu = gameInstance->LoadMenu();
-		Menu->SetText(FText::FromString("Tela 1"));
+		Menu->SetText(FText::FromString("Year 2176. Government has created tubes to transport stolen goods from other countries making it a profitable business."));
 		Menu->FadeIn();
 		GetWorldTimerManager().SetTimer(menuTimer, this, &ATube::NextMainMenuScreen, 1.f, false);
-		//gameInstance->SetGameStarted(true);
 	}
 
 	elapsedSeconds = 0;
@@ -191,7 +178,6 @@ void ATube::InsertNewPoints(float distance)
 	{
 		GetHorizontalAngle();
 	}
-	//UE_LOG(LogTemp, Display, TEXT("angleH %f %f"), angleH, distance);
 
 	if (angleV < angleVDest) {
 		angleV += angleVVar;
@@ -201,16 +187,9 @@ void ATube::InsertNewPoints(float distance)
 	}
 	else
 	{
-		//UE_LOG(LogTemp, Display, TEXT("%f %f"), angleV, angleVDest);
 		GetVerticalAngle();
 	}
-	//angleHDest = 89;
-	//angleVDest = 0;
-	/*
-	if (angleH == angleHDest && angleV == angleVDest)
-	{
-		GetNewAngle();
-	}*/
+
 	float newX = FMath::Cos(FMath::DegreesToRadians(angleH)) * 7.0f;
 	float newY = FMath::Sin(FMath::DegreesToRadians(angleH)) * 7.0f;
 	float newZ = FMath::Sin(FMath::DegreesToRadians(angleV)) * 7.0f;
