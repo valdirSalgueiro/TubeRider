@@ -18,5 +18,7 @@ void ATubePlayerController::SetupInputComponent()
 void ATubePlayerController::Cancel()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Cancel pressed"));
-	Cast<UTubeRiderGameInstance>(GetGameInstance())->LoadMenu();
+	auto gameInstance = Cast<UTubeRiderGameInstance>(GetGameInstance());
+	gameInstance->SetGameStarted(false);
+	gameInstance->LoadInGameMenu();
 }

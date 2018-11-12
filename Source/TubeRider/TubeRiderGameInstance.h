@@ -25,21 +25,28 @@ public:
 
 	bool HasGameStarted();
 
+	bool HasToReset() {
+		return resetGame;
+	}
+
+	void HasReset() {
+		resetGame = false;
+	}
+
+	void LoadMainMenu();
+
 	UFUNCTION(BlueprintCallable)
 		UMainMenu* LoadMenu();
 
-	UFUNCTION(BlueprintCallable)
-		void NextScreen();
+	void LoadInGameMenu();
 
 private:
 	TSubclassOf<class UUserWidget> MenuClass;
-	//TSubclassOf<class UUserWidget> InGameMenuClass;
+	TSubclassOf<class UUserWidget> GameMenuClass;
 
 	class UMainMenu* Menu;
 
-	int currentScreen;
-
-	FTimerHandle timer;
-
 	bool gameStarted;
+
+	bool resetGame;
 };

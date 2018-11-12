@@ -25,21 +25,11 @@ ATube::ATube()
 	RootComponent = Spline;
 
 	Spline->SetGenerateOverlapEvents(false);
-
-	currentPoint = 0;
-	PrimaryActorTick.bCanEverTick = true;
 	SetActorEnableCollision(false);
-	removePointIndex = 0;
-	elapsedSeconds = 0;
-	initializationSize = 500;
-	currentSplineMesh = 0;
+	PrimaryActorTick.bCanEverTick = true;
 
-	angleHDest = 0;
-	angleVDest = 0;
-
-	angleH = 0;
-	angleV = 0;
 	currentScreen = 0;
+	screenTimer = 3.f;
 
 	if (spawner == NULL) {
 		spawner = new ObstacleSpawner();
@@ -48,27 +38,25 @@ ATube::ATube()
 
 void ATube::NextMainMenuScreen()
 {
-	float timer = 0.5f;
+	float fadeTimer = 0.5f;
 
-	//UE_LOG(LogTemp, Display, TEXT("NextMainMenu"));
 	switch (currentScreen) {
-		case 0:
-			Menu->FadeOut();
-			GetWorldTimerManager().SetTimer(menuTimer, this, &ATube::NextMainMenuScreen, timer, false);
-			break;
-		case 1:
-			Menu->SetText(FText::FromString("Some citizens found a way to protest riding those tubes. Trying to punish anyone who tries riding the government has created death traps... all of them deceased by those traps, but not you. The last..."));
-			Menu->FadeIn();
-			GetWorldTimerManager().SetTimer(menuTimer, this, &ATube::NextMainMenuScreen, timer, false);
-			break;
-		case 2:
-			Menu->FadeOut();
-			GetWorldTimerManager().SetTimer(menuTimer, this, &ATube::NextMainMenuScreen, timer, false);
-			break;
-		case 3:
-			Menu->OpenMainMenu();
-			Menu->FadeIn();
-			break;
+	case 0:
+		Menu->FadeIn();
+		Menu->SetText(FText::FromString("Year 2176. Government has created tubes to transport stolen goods from other countries making it a profitable business."));
+		GetWorldTimerManager().SetTimer(menuTimer, this, &ATube::NextMainMenuScreen, screenTimer, false);
+		break;
+	case 1:
+		Menu->FadeOut();
+		Menu->FadeIn();
+		Menu->SetText(FText::FromString("Some citizens found a way to protest riding those tubes. Trying to punish anyone who tries riding the government has created death traps... all of them were deceased by those traps, but not you. The last..."));
+		GetWorldTimerManager().SetTimer(menuTimer, this, &ATube::NextMainMenuScreen, screenTimer, false);
+		break;
+	case 2:
+		Menu->FadeOut();
+		Menu->FadeIn();
+		Menu->OpenMainMenu();
+		break;
 	}
 	currentScreen++;
 }
@@ -79,18 +67,12 @@ void ATube::BeginPlay()
 	if (gameInstance == NULL) {
 		gameInstance = Cast<UTubeRiderGameInstance>(GetGameInstance());
 		Menu = gameInstance->LoadMenu();
-		Menu->SetText(FText::FromString("Year 2176. Government has created tubes to transport stolen goods from other countries making it a profitable business."));
-		Menu->FadeIn();
-		GetWorldTimerManager().SetTimer(menuTimer, this, &ATube::NextMainMenuScreen, 1.f, false);
+		Menu->OpenMainMenu();
+		NextMainMenuScreen();
 	}
 
-	elapsedSeconds = 0;
-	world = GetWorld();
-	Spline->ClearSplinePoints();
-	SetActorLocation(FVector::ZeroVector);
-	lastPoint = GetActorLocation();
-	int splinePointCount = Spline->GetNumberOfSplinePoints();
-	while (splinePointCount < initializationSize)
+	InitializeGame();
+	for (int i = 0; i < initializationSize; i++)
 	{
 		USplineMeshComponent *splineMesh = NewObject<USplineMeshComponent>(this);
 		splineMesh->RegisterComponent();
@@ -104,22 +86,54 @@ void ATube::BeginPlay()
 		splineMesh->SetStartOffset(FVector2D(-15, 0));
 		splineMesh->SetEndOffset(FVector2D(-15, 0));
 		SplineMesh.Add(splineMesh);
-		InsertNewPoints(0);
-		splinePointCount = Spline->GetNumberOfSplinePoints();
 	}
-	
+}
+
+void ATube::InitializeGame()
+{
+	spawner->ResetObstacles(GetWorld());
+
+	currentPoint = 0;
+	removePointIndex = 0;
+	elapsedSeconds = 0;
+	initializationSize = 500;
+	currentSplineMesh = 0;
+
+	angleHDest = 0;
+	angleVDest = 0;
+
+	angleH = 0;
+	angleV = 0;
+
+	elapsedSeconds = 0;
+	world = GetWorld();
+	Spline->ClearSplinePoints();
+	SetActorLocation(FVector::ZeroVector);
+	lastPoint = GetActorLocation();
+
+	for (int i = 0; i < initializationSize; i++)
+	{
+		InsertNewPoints();
+	}
 }
 
 void ATube::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	if (!gameInstance->HasGameStarted()) {
+		isReady = false;
 		return;
 	}
-	if (!isReady) {
-		CreateSplineMesh(false);
-		isReady = true;
+	if (gameInstance->HasToReset()) {
+		player->Reset();
+		InitializeGame();
+		gameInstance->HasReset();
 	}
+
+	if (elapsedSeconds == 0) {
+		CreateSplineMesh(false);
+	}
+	isReady = true;
 	elapsedSeconds += DeltaTime;
 }
 
@@ -163,7 +177,7 @@ void ATube::GetVerticalAngle()
 	}
 }
 
-void ATube::InsertNewPoints(float distance)
+void ATube::InsertNewPoints()
 {
 	float angleHVar = 1.f;
 	float angleVVar = 1.f;

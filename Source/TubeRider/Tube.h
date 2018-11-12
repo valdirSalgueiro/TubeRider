@@ -42,13 +42,15 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
+	void InitializeGame();
+
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
 	void GetNewAngle();
 
-	void InsertNewPoints(float distance);
+	void InsertNewPoints();
 
 	bool IsReady() {
 		return isReady;
@@ -96,6 +98,8 @@ private:
 
 	UMainMenu* Menu;
 	FTimerHandle menuTimer;
+
+	float screenTimer;
 
 	int currentScreen;
 };

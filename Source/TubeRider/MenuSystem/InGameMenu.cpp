@@ -3,6 +3,7 @@
 #include "InGameMenu.h"
 
 #include "Components/Button.h"
+#include "TubeRiderGameInstance.h"
 
 bool UInGameMenu::Initialize()
 {
@@ -21,13 +22,14 @@ bool UInGameMenu::Initialize()
 void UInGameMenu::CancelPressed()
 {
 	Teardown();
+	Cast<UTubeRiderGameInstance>(GetGameInstance())->SetGameStarted(true);
 }
 
 
 void UInGameMenu::QuitPressed()
 {
-	//if (MenuInterface != nullptr) {
-	//	Teardown();
-	//	MenuInterface->LoadMainMenu();
-	//}
+	if (MenuInterface != nullptr) {
+		Teardown();
+		MenuInterface->LoadMainMenu();
+	}
 }

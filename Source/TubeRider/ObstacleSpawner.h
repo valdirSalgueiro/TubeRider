@@ -16,6 +16,7 @@ class TUBERIDER_API ObstacleSpawner
 public:
 
 	ObstacleSpawner();
+	void ResetObstacles(UWorld * world);
 	~ObstacleSpawner();
 
 	void SpawnObjects(UWorld* world, USplineComponent* Spline, TArray<TSubclassOf<AObstacle>> obstacles, float playerAngle, int currentPoint, float elapsedSeconds);

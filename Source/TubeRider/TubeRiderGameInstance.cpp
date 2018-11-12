@@ -5,6 +5,7 @@
 #include "UObject/ConstructorHelpers.h"
 #include "UMG/Public/Animation/WidgetAnimation.h"
 #include "Engine/Public/TimerManager.h"
+#include "MenuSystem/InGameMenu.h"
 #include "MenuSystem/MainMenu.h"
 #include "MenuSystem/MenuWidget.h"
 
@@ -12,11 +13,14 @@ UTubeRiderGameInstance::UTubeRiderGameInstance(const FObjectInitializer & Object
 {
 	ConstructorHelpers::FClassFinder<UUserWidget> MenuBPClass(TEXT("/Game/Menu/IntroMenu"));
 	if (!ensure(MenuBPClass.Class != nullptr)) return;
-
 	MenuClass = MenuBPClass.Class;
 
-	currentScreen = 0;
+	ConstructorHelpers::FClassFinder<UUserWidget> GameMenuBPClass(TEXT("/Game/Menu/GameMenu"));
+	if (!ensure(GameMenuBPClass.Class != nullptr)) return;
+	GameMenuClass = GameMenuBPClass.Class;
+
 	gameStarted = false;
+	resetGame = false;
 }
 
 void UTubeRiderGameInstance::SetGameStarted(bool started)
@@ -45,8 +49,20 @@ UMainMenu* UTubeRiderGameInstance::LoadMenu()
 	return Menu;
 }
 
-void UTubeRiderGameInstance::NextScreen()
+void UTubeRiderGameInstance::LoadInGameMenu()
 {
-	currentScreen++;
-	if (!ensure(Menu != nullptr)) return;
+	if (!ensure(GameMenuClass != nullptr)) return;
+
+	auto GameMenu = CreateWidget<UInGameMenu>(this, GameMenuClass);
+	if (!ensure(GameMenu != nullptr)) return;
+	GameMenu->Setup();
+	GameMenu->SetMenuInterface(this);
+}
+
+void UTubeRiderGameInstance::LoadMainMenu()
+{
+	resetGame = true;
+	Menu = LoadMenu();
+	Menu->OpenMainMenu();
+	Menu->FadeIn();
 }

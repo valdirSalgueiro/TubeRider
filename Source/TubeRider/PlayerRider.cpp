@@ -50,6 +50,10 @@ void APlayerRider::BeginPlay()
 		tube->SetPlayer(this);
 		break;
 	}
+	Reset();
+}
+void APlayerRider::Reset()
+{
 	settings->start();
 	distance = 0;
 }
@@ -82,7 +86,7 @@ void APlayerRider::Tick(float DeltaTime)
 
 			float firstPointDistance = SplineComponent->GetDistanceAlongSplineAtSplinePoint(1);
 			if (distance > firstPointDistance) {
-				tube->InsertNewPoints(distance);
+				tube->InsertNewPoints();
 				tube->CreateSplineMesh(true);
 				distance -= firstPointDistance;
 			}

@@ -16,7 +16,7 @@ GameplaySettings::GameplaySettings()
 	initialSeconds = 0.f;
 	maxSeconds = 100.f;
 
-	initialLifeSpan=40.f;
+	initialLifeSpan=50.f;
 	maxLifeSpan=initialLifeSpan*playerInitialVelocity/playerMaxVelocity;
 
 	time = 0.f;

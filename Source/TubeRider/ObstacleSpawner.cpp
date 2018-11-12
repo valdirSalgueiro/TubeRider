@@ -3,6 +3,7 @@
 #include "ObstacleSpawner.h"
 #include "Runtime/Core/Public/Math/UnrealMathUtility.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "Runtime/Engine/Public/EngineUtils.h"
 #include "GameplaySettings.h"
 
 ObstacleSpawner::ObstacleSpawner()
@@ -12,6 +13,15 @@ ObstacleSpawner::ObstacleSpawner()
 	minVelocity = 0.2f;
 	midVelocity = 0.3f;
 	maxVelocity = 0.5f;
+}
+
+void ObstacleSpawner::ResetObstacles(UWorld * world)
+{
+	lastPlacedSecond = 0;
+	for (TActorIterator<AObstacle> ActorItr(world); ActorItr; ++ActorItr)
+	{
+		world->DestroyActor(*ActorItr);
+	}
 }
 
 ObstacleSpawner::~ObstacleSpawner()
