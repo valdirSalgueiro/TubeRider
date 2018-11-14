@@ -76,4 +76,6 @@ private:
 		USpotLightComponent* FlashLightComponent;
 
 	GameplaySettings* settings;
+
+	int hits;
 };

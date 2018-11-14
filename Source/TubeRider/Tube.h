@@ -71,10 +71,6 @@ private:
 
 	int currentPoint;
 
-	int yDirection;
-	int zDirection;
-
-	TArray<FVector> SplinePoints;
 	FVector lastPoint;
 	float angleH;
 	float angleV;

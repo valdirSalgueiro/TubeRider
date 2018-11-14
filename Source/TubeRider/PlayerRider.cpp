@@ -13,31 +13,35 @@ APlayerRider::APlayerRider()
 	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 	AutoPossessPlayer = EAutoReceiveInput::Player0;
-	SphereComponent = CreateDefaultSubobject<USphereComponent>(TEXT("RootComponent"));;
-	RootComponent = SphereComponent;
+	auto scene = CreateDefaultSubobject<USceneComponent>(TEXT("RootComponent"));;
+	RootComponent = scene;
+
+	CameraSpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraSpringArm"));
+	CameraSpringArm->TargetArmLength = 0;
+	CameraSpringArm->SocketOffset = FVector(0, 0, 20);
+	CameraSpringArm->AttachTo(RootComponent);
+	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("GameCamera"));
+	Camera->AttachTo(CameraSpringArm);
+
+	SphereComponent = CreateDefaultSubobject<USphereComponent>(TEXT("SphereComponent"));;
 	SphereComponent->InitSphereRadius(1.0f);
 	SphereComponent->SetCollisionProfileName(TEXT("Pawn"));
 	SphereComponent->SetHiddenInGame(true);
 	SphereComponent->SetSimulatePhysics(false);
 	SphereComponent->SetEnableGravity(false);
+	SphereComponent->SetupAttachment(CameraSpringArm);
 
+	//FlashLightComponent = CreateDefaultSubobject<USpotLightComponent>(TEXT("Flashlight"));
+	//FlashLightComponent->SetupAttachment(Camera);
+	//FlashLightComponent->RelativeLocation = FVector(10, 0, 4.f);
+	//FlashLightComponent->AttenuationRadius = 1000.f;
+	//FlashLightComponent->bAffectsWorld = true;
+	//FlashLightComponent->SetMobility(EComponentMobility::Movable);
 
-	CameraSpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraSpringArm"));
-	CameraSpringArm->SetupAttachment(RootComponent);
-	CameraSpringArm->TargetArmLength = 0.f;
-	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("GameCamera"));
-	Camera->SetupAttachment(RootComponent);
-
-	FlashLightComponent = CreateDefaultSubobject<USpotLightComponent>(TEXT("Flashlight"));
-	FlashLightComponent->SetupAttachment(Camera);
-	FlashLightComponent->RelativeLocation = FVector(10, 0, 4.f);
-	FlashLightComponent->AttenuationRadius = 1000.f;
-	FlashLightComponent->bAffectsWorld = true;
-	FlashLightComponent->SetMobility(EComponentMobility::Movable);
-
-	angle = 90;
+	angle = 0;
 	distance = 0;
 	playerVelocity = settings->playerInitialVelocity;
+	hits = 0;
 }
 
 // Called when the game starts or when spawned
@@ -56,6 +60,8 @@ void APlayerRider::Reset()
 {
 	settings->start();
 	distance = 0;
+	Camera->PostProcessSettings.bOverride_VignetteIntensity = true;
+	Camera->PostProcessSettings.VignetteIntensity = 0;
 }
 // Called every frame
 void APlayerRider::Tick(float DeltaTime)
@@ -76,10 +82,9 @@ void APlayerRider::Tick(float DeltaTime)
 				angle += MovementInput.Y * 200 * DeltaTime;
 				angle = (int)angle % 360;
 			}
-			auto vecRight = FRotationMatrix(transform.Rotator()).GetScaledAxis(EAxis::Y);
-			auto vecUp = FRotationMatrix(transform.Rotator()).GetScaledAxis(EAxis::Z);
-			transform.SetLocation(location + (-vecRight * FMath::Cos(FMath::DegreesToRadians(angle)) * 20) + (vecUp * FMath::Sin(FMath::DegreesToRadians(angle)) * 20));
-			transform.SetRotation(FRotator(transform.GetRotation()).Add(0, 0, angle - 90).Quaternion());
+
+			//transform.SetLocation(location);
+			CameraSpringArm->SetRelativeRotation(FRotator(0, 0, angle));			
 			SetActorTransform(transform);
 			
 			distance += DeltaTime * playerVelocity;
@@ -113,6 +118,11 @@ void APlayerRider::Shake(float scale)
 	if (tube != NULL && tube->IsReady() && cameraShake != NULL)
 	{
 		GetWorld()->GetFirstPlayerController()->PlayerCameraManager->PlayCameraShake(cameraShake, scale);
+		hits++;
+		float vignette = hits;
+		vignette = FMath::Min(3.f, vignette);
+		Camera->PostProcessSettings.bOverride_VignetteIntensity = true;
+		Camera->PostProcessSettings.VignetteIntensity = vignette;
 	}
 }
 
