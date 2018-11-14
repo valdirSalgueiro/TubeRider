@@ -81,7 +81,7 @@ void ATube::BeginPlay()
 		splineMesh->SetMobility(EComponentMobility::Type::Movable);
 		splineMesh->SetForwardAxis(ESplineMeshAxis::Y);
 		splineMesh->SetStaticMesh(Mesh);
-		splineMesh->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+		splineMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		splineMesh->AttachToComponent(Spline, FAttachmentTransformRules::FAttachmentTransformRules(EAttachmentRule::KeepRelative, true));
 		splineMesh->SetStartOffset(FVector2D(-15, 0));
 		splineMesh->SetEndOffset(FVector2D(-15, 0));
